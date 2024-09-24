@@ -17,7 +17,7 @@ We are choosing the **standard project option** for the course project.
 We are building a miniature version of Amazon, where sellers can create product listings and users can browse and purchase products using virtual currency. Users can review products and sellers, and transactions are conducted within the website.
 
 ## Progress Summary Since Milestone 1:
-All contributed in combininb our database and ER diagram
+All contributed in combining our database
 
 - **William Chen (Users Guru)**:  Drafted the database schema for Account/Purchases and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
