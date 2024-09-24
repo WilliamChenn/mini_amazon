@@ -19,7 +19,7 @@ We are building a miniature version of Amazon, where sellers can create product 
 ## Progress Summary Since Milestone 1:
 All contributed in combininb our database and ER diagram
 
-- **William Chen (Users Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Account/Purchases
+- **William Chen (Users Guru)**:  Drafted the database schema for Account/Purchases and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
 - **Prashamsa Koirala (Products Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Products
 
