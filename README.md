@@ -1,4 +1,4 @@
-Team Name: ShopMasters
+Team Name: PokéBots
 
 ## Team Members and Roles:
 
