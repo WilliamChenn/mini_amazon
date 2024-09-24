@@ -21,11 +21,11 @@ All contributed in combininb our database and ER diagram
 
 - **William Chen (Users Guru)**:  Drafted the database schema for Account/Purchases and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
-- **Prashamsa Koirala (Products Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Products
+- **Prashamsa Koirala (Products Guru)**: Drafted the database schema for Products and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
-- **Brian Kim (Cars Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Carts/Order
+- **Brian Kim (Cars Guru)**: Drafted the database schema for Cart/Order and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
-- **Joanne Chae (Sellers Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Inventory/Order Fulfillment
+- **Joanne Chae (Sellers Guru)**: Drafted the database schema for Inventory/Order Fulfillment and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
 
-- **Kevin Lee (Social Guru)**: Set up the development environment and tested the skeleton code. Drafted the database schema for Feedback/Messaging
+- **Kevin Lee (Social Guru)**: Drafted the database schema for Feedback/Messaging and drew out relational tables as well as the constraints. Worked on formalizing page by page mock up. 
   
