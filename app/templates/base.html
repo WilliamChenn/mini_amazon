@@ -2,30 +2,41 @@
 <html lang="en">
 
 <head>
-  <title>Mini Amazon</title>
+  <title>Mini Amazon - Pokémon Style</title>
   <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/example.css') }}">
   <style>
-    body {
-        font-family: "Lato", sans-serif;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-    .main-head {
-        height: 150px;
-        background: #FFF;
+    body {
+        font-family: "Press Start 2P", cursive;
+        background-color: #f0f8ff;
+        background-image: url('https://example.com/path-to-pokemon-bg.jpg'); /* Set this to a Pokémon-themed background image */
+        background-size: cover;
+        background-position: center;
     }
 
     .sidenav {
         height: 100%;
-        background-color: #000;
-        overflow-x: hidden;
+        background-color: #ffcc00;
         padding-top: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        border-right: 5px solid #d32f2f;
     }
 
-    .main {
-        padding: 0px 10px;
+    .main-head {
+        height: 150px;
+        background: #ffcc00;
+        text-align: center;
+        padding-top: 30px;
+    }
+
+    .main-head h1 {
+        color: #3b4cca;
+        text-shadow: 3px 3px #ff0000;
+        font-size: 2.5em;
     }
 
     .login-main-text {
@@ -36,11 +47,41 @@
 
     .login-main-text h2 {
         font-weight: 300;
+        color: #3b4cca;
+        text-shadow: 2px 2px #ff0000;
     }
 
-    .btn-black {
-        background-color: #000 !important;
+    .btn-pokemon {
+        background-color: #ff0000;
         color: #fff;
+        border-radius: 50px;
+        border: 2px solid #000;
+        font-weight: bold;
+        padding: 10px 30px;
+        transition: 0.3s ease;
+    }
+
+    .btn-pokemon:hover {
+        background-color: #3b4cca;
+        color: #ffcc00;
+        border-color: #ffcc00;
+    }
+
+    .pokemon-header {
+        color: #3b4cca;
+        text-align: center;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px #ff0000;
+    }
+
+    .main {
+        padding: 20px;
+    }
+
+    h1 {
+        color: #ffcc00;
+        text-shadow: 2px 2px #000;
     }
   </style>
 </head>
@@ -48,18 +89,24 @@
 <body>
   <div class="sidenav">
     {% block msg %}
-      <h1 style="color:aliceblue">Welcome to CompSci 316 Mini Amazon!</h1>
-      <div style="color: aliceblue; text-align: right; margin-bottom: 25px">
+      <h1 class="pokemon-header">Welcome to Mini Amazon - Pokémon Edition!</h1>
+      <div style="color: black; text-align: right; margin-bottom: 25px">
         {% if current_user.is_authenticated %}
-          Hello {{current_user.firstname}}! <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-light">Log out</a>
+          Hello {{current_user.firstname}}! <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-pokemon">Log out</a>
         {% else %}
-          <a href="{{ url_for('users.login') }}" type="button" class="btn btn-light">Log in</a>
+          <a href="{{ url_for('users.login') }}" type="button" class="btn btn-pokemon">Log in</a>
         {% endif %}
       </div>
     {% endblock %}
   </div>
+  
   <div class="main">
-    {% block content %}{% endblock %}
+    {% block content %}
+      <div class="container">
+        <h2>Catch 'em all deals!</h2>
+        <!-- Add some cards or product listings here styled with Pokémon colors -->
+      </div>
+    {% endblock %}
   </div>
 </body>
 
