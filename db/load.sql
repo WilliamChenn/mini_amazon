@@ -25,3 +25,6 @@ SELECT pg_catalog.setval('products_product_id_seq',
 SELECT pg_catalog.setval('purchases_purchase_id_seq',
                          (SELECT MAX(purchase_id)+1 FROM Purchases),
                          false);
+
+-- Load data into Product_Categories table
+\COPY Product_Categories FROM 'Product_Categories.csv' WITH DELIMITER ',' NULL '' CSV;

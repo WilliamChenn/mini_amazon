@@ -13,11 +13,11 @@ CREATE TABLE Users (
     summary TEXT
 );
 
--- Create Categories table first, as Products depends on it
+-- Create Categories table with hierarchical structure
 CREATE TABLE Categories (
     category_id SERIAL PRIMARY KEY,
-    category_name VARCHAR(255) NOT NULL,
-    parent_id INT REFERENCES Categories(category_id) -- Supports hierarchical structure
+    category_name VARCHAR(255) UNIQUE NOT NULL,
+    parent_id INT REFERENCES Categories(category_id) ON DELETE SET NULL -- Hierarchical structure
 );
 
 -- Create Products table, as it depends on Categories and Users
@@ -31,7 +31,15 @@ CREATE TABLE Products (
     price DECIMAL(12,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    available BOOLEAN DEFAULT TRUE
+    available BOOLEAN DEFAULT TRUE  -- Add available column
+);
+
+
+-- Create Product_Categories table (many-to-many relationship)
+CREATE TABLE Product_Categories (
+    product_id INT NOT NULL REFERENCES Products(product_id),
+    category_id INT NOT NULL REFERENCES Categories(category_id),
+    PRIMARY KEY (product_id, category_id)
 );
 
 -- Create Purchases table, as it depends on Products and Users
