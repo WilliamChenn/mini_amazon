@@ -8,88 +8,150 @@
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/example.css') }}">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-    body {
-        font-family: "Press Start 2P", cursive;
-        background-color: #f0f8ff;
-        background-image: url('https://example.com/path-to-pokemon-bg.jpg'); /* Set this to a Pokémon-themed background image */
-        background-size: cover;
-        background-position: center;
-    }
+body {
+    font-family: "Press Start 2P", cursive;
+    background-color: #f0f8ff;
+    background-image: url('https://example.com/path-to-pokemon-bg.jpg'); /* Set this to a Pokémon-themed background image */
+    background-size: cover;
+    background-position: center;
+    color: #000;
+}
 
-    .sidenav {
-        height: 100%;
-        background-color: #ffcc00;
-        padding-top: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        border-right: 5px solid #d32f2f;
-    }
+.sidenav {
+    height: 100%;
+    background-color: #ffcc00;
+    padding-top: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
-    .main-head {
-        height: 150px;
-        background: #ffcc00;
-        text-align: center;
-        padding-top: 30px;
-    }
+.main-head {
+    height: 150px;
+    background: #ffcc00;
+    text-align: center;
+    padding-top: 30px;
+}
 
-    .main-head h1 {
-        color: #3b4cca;
-        text-shadow: 3px 3px #ff0000;
-        font-size: 2.5em;
-    }
+.main-head h1 {
+    color: #3b4cca;
+    text-shadow: 3px 3px #ff0000;
+    font-size: 2.5em;
+}
 
-    .login-main-text {
-        margin-top: 20%;
-        padding: 60px;
-        color: #fff;
-    }
+.login-main-text {
+    margin-top: 20%;
+    padding: 60px;
+    color: #fff;
+}
 
-    .login-main-text h2 {
-        font-weight: 300;
-        color: #3b4cca;
-        text-shadow: 2px 2px #ff0000;
-    }
+.login-main-text h2 {
+    font-weight: 300;
+    color: #3b4cca;
+    text-shadow: 2px 2px #ff0000;
+}
 
-    .btn-pokemon {
-        background-color: #ff0000;
-        color: #fff;
-        border-radius: 50px;
-        border: 2px solid #000;
-        font-weight: bold;
-        padding: 10px 30px;
-        transition: 0.3s ease;
-    }
+.btn-pokemon {
+    background-color: #ff0000;
+    color: #fff;
+    border-radius: 50px;
+    border: 2px solid #000;
+    font-weight: bold;
+    padding: 10px 30px;
+    transition: 0.3s ease;
+}
 
-    .btn-pokemon:hover {
-        background-color: #3b4cca;
-        color: #ffcc00;
-        border-color: #ffcc00;
-    }
+.btn-pokemon:hover {
+    background-color: #3b4cca;
+    color: #ffcc00;
+    border-color: #ffcc00;
+}
 
-    .pokemon-header {
-        color: #3b4cca;
-        text-align: center;
-        font-size: 1.5em;
-        margin-bottom: 20px;
-        text-shadow: 1px 1px #ff0000;
-    }
+.pokemon-header {
+    color: #3b4cca;
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px #ff0000;
+}
 
-    .main {
-        padding: 20px;
-    }
+.main {
+    padding: 20px;
+}
 
-    h1 {
-        color: #ffcc00;
-        text-shadow: 2px 2px #000;
-    }
+h1 {
+    color: #ffcc00;
+    text-shadow: 2px 2px #000;
+}
+
+/* Card Styles */
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ffcc00;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-img-top {
+    border-radius: 10px 10px 0 0;
+    object-fit: cover;
+    height: 200px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    color: #3b4cca;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.card-price {
+    color: #ff0000;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 0.9em;
+    color: #333;
+}
+
+.text-muted {
+    font-size: 0.85em;
+    color: #555;
+}
+
+.btn-primary {
+    background-color: #3b4cca;
+    border-color: #3b4cca;
+    font-weight: bold;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 1em;
+}
+
+.btn-primary:hover {
+    background-color: #ffcc00;
+    color: #3b4cca;
+    border-color: #ffcc00;
+}
+
   </style>
 </head>
 
 <body>
   <div class="sidenav">
     {% block msg %}
-      <h1 class="pokemon-header">Welcome to Mini Amazon - Pokémon Edition!</h1>
+      <h1 class="pokemon-header">Welcome to PokéZon!</h1>
       <div style="color: black; text-align: right; margin-bottom: 25px">
         {% if current_user.is_authenticated %}
           Hello {{current_user.firstname}}! <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-pokemon">Log out</a>
@@ -104,7 +166,6 @@
     {% block content %}
       <div class="container">
         <h2>Catch 'em all deals!</h2>
-        <!-- Add some cards or product listings here styled with Pokémon colors -->
       </div>
     {% endblock %}
   </div>
