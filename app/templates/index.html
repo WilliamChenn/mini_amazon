@@ -5,46 +5,67 @@
 <br><br>
 
 <h2>Products for sale:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Product ID</th>
-      <th scope="col">Product Name</th>
-      <th scope="col">Price</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for product in avail_products%}
-      <tr>
-        <th scope="row">{{product.product_id}}</th>
-        <td>{{product.name}}</td>
-        <td>{{product.price}}</td>
-      </tr>
+
+<!-- Card container for products -->
+<div class="container">
+  <div class="row">
+    <!-- Loop through available products and display each one as a card -->
+    {% for product in avail_products %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <!-- Product Image -->
+        <img src="https://via.placeholder.com/150" class="card-img-top" alt="{{ product.name }}">
+        
+        <div class="card-body">
+          <!-- Product Name -->
+          <h5 class="card-title">{{ product.name }}</h5>
+          
+          <!-- Smaller Product ID -->
+          <p class="text-muted" style="font-size: 0.85em;">Product ID: {{ product.product_id }}</p>
+          
+          <!-- Product Summary -->
+          <p class="card-text">{{ product.summary }}</p>
+          
+          <!-- Price in bold -->
+          <p class="card-price font-weight-bold">Price: ${{ product.price }}</p>
+
+          <!-- Buy Now Button (You can link this to a shopping cart or checkout page) -->
+          <a href="#" class="btn btn-primary">Buy Now</a>
+        </div>
+      </div>
+    </div>
     {% endfor %}
-  </tbody>
-</table>
+  </div>
+</div>
 
 <br><br>
+
 {% if current_user.is_authenticated %}
 <h2>Your recent purchases:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Purchase ID</th>
-      <th scope="col">Product Name</th>
-      <th scope="col">Price</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for purchase in purchase_history%}
-      <tr>
-        <th scope="row">{{purchase.purchase_id}}</th>
-        <td>{{purchase.product_id}}</td>
-        <td>{{purchase.time_purchased}}</td>
-      </tr>
+
+<!-- Card container for purchase history -->
+<div class="container">
+  <div class="row">
+    <!-- Loop through purchase history and display each one as a card -->
+    {% for purchase in purchase_history %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Purchase ID -->
+          <p class="text-muted" style="font-size: 0.85em;">Purchase ID: {{ purchase.purchase_id }}</p>
+          
+          <!-- Product ID (Could be linked to the product itself) -->
+          <p class="card-text">Product: {{ purchase.product_id }}</p>
+
+          <!-- Time of Purchase -->
+          <p class="text-muted">Purchased on: {{ purchase.time_purchased }}</p>
+        </div>
+      </div>
+    </div>
     {% endfor %}
-  </tbody>
-</table>
+  </div>
+</div>
+
 {% else %}
 <p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
 {% endif %}
