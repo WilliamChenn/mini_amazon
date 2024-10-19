@@ -2,31 +2,28 @@ from flask import current_app as app
 
 
 class Purchase:
-    def __init__(self, id, uid, pid, time_purchased):
-        self.id = id
-        self.uid = uid
-        self.pid = pid
+    def __init__(self, purchase_id, user_id, product_id, time_purchased):
+        self.purchase_id = purchase_id
+        self.user_id = user_id
+        self.product_id = product_id
         self.time_purchased = time_purchased
 
     @staticmethod
-    def get(id):
+    def get(purchase_id):
         rows = app.db.execute('''
-SELECT id, uid, pid, time_purchased
+SELECT purchase_id, user_id, product_id, time_purchased
 FROM Purchases
-WHERE id = :id
+WHERE purchase_id = :purchase_id
 ''',
-                              id=id)
-        return Purchase(*(rows[0])) if rows else None
+                              purchase_id=purchase_id)
+        return Purchase(*rows[0]) if rows else None
 
     @staticmethod
-    def get_all_by_uid_since(uid, since):
+    def get_all_for_user(user_id):
         rows = app.db.execute('''
-SELECT id, uid, pid, time_purchased
+SELECT purchase_id, user_id, product_id, time_purchased
 FROM Purchases
-WHERE uid = :uid
-AND time_purchased >= :since
-ORDER BY time_purchased DESC
+WHERE user_id = :user_id
 ''',
-                              uid=uid,
-                              since=since)
+                              user_id=user_id)
         return [Purchase(*row) for row in rows]
