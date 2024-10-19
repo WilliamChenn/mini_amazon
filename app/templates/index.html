@@ -16,7 +16,7 @@
   <tbody>
     {% for product in avail_products%}
       <tr>
-        <th scope="row">{{product.id}}</th>
+        <th scope="row">{{product.product_id}}</th>
         <td>{{product.name}}</td>
         <td>{{product.price}}</td>
       </tr>
@@ -38,8 +38,8 @@
   <tbody>
     {% for purchase in purchase_history%}
       <tr>
-        <th scope="row">{{purchase.id}}</th>
-        <td>{{purchase.pid}}</td>
+        <th scope="row">{{purchase.purchase_id}}</th>
+        <td>{{purchase.product_id}}</td>
         <td>{{purchase.time_purchased}}</td>
       </tr>
     {% endfor %}
