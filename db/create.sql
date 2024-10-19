@@ -49,3 +49,99 @@ CREATE TABLE Purchases (
     product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
     time_purchased TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'UTC')
 );
+
+-- Create Carts table for persistent user carts
+CREATE TABLE Carts (
+    cart_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES Users(user_id),  -- Each user has one unique cart
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL  -- Automatically set to current time
+);
+
+-- Create Cart_items table linking products and carts
+CREATE TABLE Cart_items (
+    cart_item_id SERIAL PRIMARY KEY,
+    cart_id INT NOT NULL REFERENCES Carts(cart_id),  -- References Carts table
+    product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
+    seller_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table for the seller
+    quantity INT CHECK (quantity > 0) NOT NULL,  -- Quantity must be greater than 0
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL  -- Automatically set to current time
+);
+
+-- Create Orders table
+CREATE TABLE Orders (
+    order_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table
+    total_amount DECIMAL(10,2) NOT NULL,
+    num_items INT NOT NULL,
+    fulfillment_status VARCHAR(50) NOT NULL CHECK (fulfillment_status IN ('Pending', 'Shipped', 'Fulfilled')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Create Order_Items table
+CREATE TABLE Order_Items (
+    order_item_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES Orders(order_id),  -- References Orders table
+    product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
+    seller_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL,
+    fulfillment_status VARCHAR(50) NOT NULL CHECK (fulfillment_status IN ('Pending', 'Shipped', 'Fulfilled')),
+    fulfilled_at TIMESTAMP
+);
+
+-- Create Inventory table
+CREATE TABLE Inventory (
+    inventory_id SERIAL PRIMARY KEY,
+    seller_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table
+    product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
+    quantity INT NOT NULL CHECK (quantity >= 0),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Create Transactions table
+CREATE TABLE Transactions (
+    transaction_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table
+    transaction_type VARCHAR(50) NOT NULL CHECK (transaction_type IN ('Deposit', 'Withdrawal')),
+    amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
+    balance_after DECIMAL(10,2) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Create Reviews table
+CREATE TABLE Reviews (
+    review_id SERIAL PRIMARY KEY,
+    seller_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table (for sellers)
+    reviewer_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table (for reviewers)
+    product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Create Review_Images table
+CREATE TABLE Review_Images (
+    image_id SERIAL PRIMARY KEY,
+    review_id INT NOT NULL REFERENCES Reviews(review_id),  -- References Reviews table
+    image_url TEXT NOT NULL
+);
+
+-- Create Message_Threads table
+CREATE TABLE Message_Threads (
+    thread_id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES Orders(order_id),  -- References Orders table
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Create Messages table
+CREATE TABLE Messages (
+    message_id SERIAL PRIMARY KEY,
+    thread_id INT NOT NULL REFERENCES Message_Threads(thread_id),  -- References Message_Threads table
+    sender_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table (sender)
+    receiver_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table (receiver)
+    content TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
