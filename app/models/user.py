@@ -1,4 +1,6 @@
 from flask_login import UserMixin
+import os
+import csv
 from flask import current_app as app
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
@@ -75,26 +77,70 @@ WHERE email = :email
                 account_number = User.generate_account_number()
 
             rows = app.db.execute("""
-INSERT INTO Users(email, password, first_name, last_name, address, balance, account_number, public_name, is_seller, summary)
-VALUES(:email, :password, :first_name, :last_name, :address, :balance, :account_number, :public_name, :is_seller, :summary)
-RETURNING user_id
-""",
-                                  email=email,
-                                  password=generate_password_hash(password),
-                                  first_name=first_name,
-                                  last_name=last_name,
-                                  address=address,
-                                  balance=0.00,  # Default value
-                                  account_number=account_number,
-                                  public_name=first_name,  # Or any other logic
-                                  is_seller=False,  # Default value
-                                  summary=summary)
+                INSERT INTO Users(email, password, first_name, last_name, address, balance, account_number, public_name, is_seller, summary)
+                VALUES(:email, :password, :first_name, :last_name, :address, :balance, :account_number, :public_name, :is_seller, :summary)
+                RETURNING user_id
+            """, email=email,
+               password=generate_password_hash(password),
+               first_name=first_name,
+               last_name=last_name,
+               address=address,
+               balance=0.00,  # Default value
+               account_number=account_number,
+               public_name=first_name,  # Or any other logic
+               is_seller=False,  # Default value
+               summary=summary)
             user_id = rows[0][0]
-            return User.get(user_id)
+            user = User.get(user_id)
+
+            # Write user data to CSV
+            User.write_to_csv(user)
+
+            return user
         except Exception as e:
             # Enhanced error handling
             print(f"Error registering user: {str(e)}")
             return None
+        
+
+    @staticmethod
+    def write_to_csv(user):
+        """
+        Appends the user's data to the Users.csv file.
+
+        Parameters:
+            user (User): The user object to write to CSV.
+        """
+        try:
+            # Determine the path to Users.csv relative to user.py
+            # user.py is located at /home/ubuntu/shared/mini_amazon/app/models/user.py
+            # Users.csv is at /home/ubuntu/shared/mini_amazon/db/data/Users.csv
+            # Therefore, navigate up two directories and then to db/data/Users.csv
+            base_dir = os.path.dirname(os.path.abspath(__file__))  # /home/ubuntu/shared/mini_amazon/app/models
+            csv_path = os.path.join(base_dir, '../../db/data/Users.csv')
+            csv_path = os.path.abspath(csv_path)  # Normalize the path
+
+            # Open the CSV file in append mode
+            with open(csv_path, 'a', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+
+                # Write the user data as a new row
+                writer.writerow([
+                    user.user_id,
+                    user.email,
+                    user.first_name,
+                    user.last_name,
+                    user.address if user.address else '',
+                    user.password,
+                    f"{user.balance:.2f}",  # Ensure two decimal places
+                    user.account_number,
+                    user.public_name,
+                    user.is_seller,
+                    user.summary if user.summary else ''
+                ])
+            print(f"User data written to CSV: {csv_path}")
+        except Exception as e:
+            print(f"Error writing user data to CSV: {str(e)}")
 
     @staticmethod
     @login.user_loader
