@@ -23,3 +23,10 @@ VALUES (:user_id)
 RETURNING cart_id, user_id, created_at
 ''', user_id=user_id)
         return Cart(*rows[0]) if rows else None
+
+    @staticmethod
+    def get_or_create_cart(user_id):
+        cart = Cart.get_cart(user_id)
+        if not cart:
+            cart = Cart.create_cart(user_id)
+        return cart

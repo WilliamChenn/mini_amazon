@@ -8,16 +8,17 @@
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/example.css') }}">
   <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-body {
-    font-family: "Press Start 2P", cursive;
-    background-color: #f0f8ff;
-    background-image: url('https://example.com/path-to-pokemon-bg.jpg'); /* Set this to a Pokémon-themed background image */
-    background-size: cover;
-    background-position: center;
-    color: #000;
-}
+    /* Existing styles remain unchanged */
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    
+    body {
+        font-family: "Press Start 2P", cursive;
+        background-color: #f0f8ff;
+        background-image: url('https://example.com/path-to-pokemon-bg.jpg'); /* Set this to a Pokémon-themed background image */
+        background-size: cover;
+        background-position: center;
+        color: #000;
+    }
 
 .sidenav {
     height: 100%;
@@ -157,7 +158,9 @@ h1 {
       <h1 class="pokemon-header">Welcome to PokéZon!</h1>
       <div style="color: black; text-align: right; margin-bottom: 25px">
         {% if current_user.is_authenticated %}
-          Hello {{current_user.firstname}}! <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-pokemon">Log out</a>
+          <!-- Added Cart Button -->
+          <a href="{{ url_for('cart.view_cart') }}" type="button" class="btn btn-pokemon">Cart</a>
+          <a href="{{ url_for('users.logout') }}" type="button" class="btn btn-pokemon">Log out</a>
         {% else %}
           <a href="{{ url_for('users.login') }}" type="button" class="btn btn-pokemon">Log in</a>
         {% endif %}
