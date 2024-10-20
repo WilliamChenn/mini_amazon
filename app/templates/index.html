@@ -14,23 +14,29 @@
     <div class="col-md-4">
       <div class="card mb-4">
         <!-- Product Image -->
-        <img src="https://via.placeholder.com/150" class="card-img-top">
-        
+        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+
         <div class="card-body">
           <!-- Product Name -->
           <h5 class="card-title">{{ product.name }}</h5>
-          
+
           <!-- Smaller Product ID -->
           <p class="text-muted" style="font-size: 0.85em;">Product ID: {{ product.product_id }}</p>
-          
+
           <!-- Product Summary -->
           <p class="card-text">{{ product.summary }}</p>
-          
-          <!-- Price in bold -->
-          <p class="card-price font-weight-bold">Price: ${{ product.price }}</p>
 
-          <!-- Buy Now Button (You can link this to a shopping cart or checkout page) -->
-          <a href="#" class="btn btn-primary">Buy Now</a>
+          <!-- Price in bold -->
+          <p class="card-price font-weight-bold">Price: ${{ "%.2f"|format(product.price) }}</p>
+
+          <!-- Buy Now Form -->
+          <form action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}" method="POST">
+            <!-- If using Flask-WTF for CSRF protection -->
+            {% if csrf_token %}
+              {{ csrf_token() }}
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Buy Now</button>
+          </form>
         </div>
       </div>
     </div>
@@ -53,7 +59,7 @@
         <div class="card-body">
           <!-- Purchase ID -->
           <p class="text-muted" style="font-size: 0.85em;">Purchase ID: {{ purchase.purchase_id }}</p>
-          
+
           <!-- Product ID (Could be linked to the product itself) -->
           <p class="card-text">Product: {{ purchase.product_id }}</p>
 
