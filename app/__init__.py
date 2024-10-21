@@ -27,8 +27,9 @@ def create_app():
     app.register_blueprint(cart_bp)
 
     # Inside the create_app() function after registering other blueprints
-    from .purchase import bp as purchase_bp
-    app.register_blueprint(purchase_bp)
+    #from .purchase import bp as purchase_bp
+   # app.register_blueprint(purchase_bp)
+
 
 
     return app
