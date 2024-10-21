@@ -1,78 +1,88 @@
 {% extends "base.html" %}
 {% block content %}
 
-<body>
-  <div class="container mt-5">
-    <h1 class="text-center pokemon-header">User Profile</h1>
+<div class="container mt-5">
+  <h1 class="text-center">User Profile</h1>
 
-    <!-- User Information -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <h2>{{ current_user.first_name }} {{ current_user.last_name }}</h2>
-        <p>Email: {{ current_user.email }}</p>
-        <p>Address: {{ current_user.address }}</p>
-        <p>Summary: {{ current_user.summary }}</p>
-        <p>Balance: {{ current_user.balance }}</p>
-        <!-- Add other profile information as needed -->
-      </div>
+  <!-- User Information -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2>{{ current_user.first_name }} {{ current_user.last_name }}</h2>
+      <p>Email: {{ current_user.email }}</p>
+      <p>Address: {{ current_user.address }}</p>
+      <p>Summary: {{ current_user.summary }}</p>
+      <p>Balance: ${{ "%.2f"|format(current_user.balance) }}</p>
     </div>
+  </div>
 
-    <!-- Past Orders -->
-    <h3 class="mt-5">Past Orders</h3>
-    {% if orders %}
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Order Number</th>
-          <th>Date</th>
-          <th>Total Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for order in orders %}
-        <tr>
-          <td>{{ order.number }}</td>
-          <td>{{ order.date }}</td>
-          <td>{{ order.total_amount }}</td>
-          <td>{{ order.status }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="alert alert-warning text-center">
-      <p>No past orders found.</p>
-    </div>
-    {% endif %}
+  <!-- Past Orders -->
+  <h3 class="mt-5">Past Orders</h3>
+  {% if orders_with_items %}
+  <div class="row">
+    {% for order_data in orders_with_items %}
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-body">
+          <!-- Order Information -->
+          <h5 class="card-title">Order ID: {{ order_data.order.order_id }}</h5>
+          <p>Order Date: {{ order_data.order.created_at }}</p>
+          <p>Total Amount: ${{ "%.2f"|format(order_data.order.total_amount) }}</p>
+          <p>Status: {{ order_data.order.fulfillment_status }}</p>
 
-    <!-- Recent Reviews -->
-    <h3 class="mt-5">Recent Reviews</h3>
-    {% if reviews %}
-    <div class="row">
-      {% for review in reviews %}
-      <div class="col-md-4">
-        <div class="card mb-4 shadow-sm border-warning">
-          <div class="card-body">
-            <h5 class="card-title" style="color: #3b4cca">
-              {{ review.product_id }}
-            </h5>
-            <h6 class="card-subtitle mb-2 text-muted">
-              Rating: {{ review.rating }} / 5
-            </h6>
-            <p class="card-text">{{ review.comment }}</p>
-            <small class="text-muted">Posted on: {{ review.created_at }}</small>
+          <!-- Order Items -->
+          <h6 class="mt-4">Items in this order:</h6>
+          <div class="row">
+            {% for item_data in order_data['items'] %}
+            <div class="col-md-4">
+              <div class="card mb-3">
+                <img src="{{ item_data.product.image_url }}" class="card-img-top" alt="{{ item_data.product.name }}">
+                <div class="card-body">
+                  <h5 class="card-title">{{ item_data.product.name }}</h5>
+                  <p>Quantity: {{ item_data.order_item.quantity }}</p>
+                  <p>Unit Price: ${{ "%.2f"|format(item_data.order_item.unit_price) }}</p>
+                  <p>Total Price: ${{ "%.2f"|format(item_data.order_item.total_price) }}</p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
-      {% endfor %}
     </div>
-    {% else %}
-    <div class="alert alert-warning text-center">
-      <p>No reviews found.</p>
-    </div>
-    {% endif %}
+    {% endfor %}
   </div>
-</body>
+  {% else %}
+  <div class="alert alert-warning text-center">
+    <p>No past orders found.</p>
+  </div>
+  {% endif %}
+
+  <!-- Recent Reviews -->
+  <h3 class="mt-5">Recent Reviews</h3>
+  {% if reviews %}
+  <div class="row">
+    {% for review in reviews %}
+    <div class="col-md-4">
+      <div class="card mb-4 shadow-sm border-warning">
+        <div class="card-body">
+          <h5 class="card-title">
+            Product ID: {{ review.product_id }}
+          </h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            Rating: {{ review.rating }} / 5
+          </h6>
+          <p class="card-text">{{ review.comment }}</p>
+          <small class="text-muted">Posted on: {{ review.created_at }}</small>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning text-center">
+    <p>No reviews found.</p>
+  </div>
+  {% endif %}
+</div>
 
 {% endblock %}
