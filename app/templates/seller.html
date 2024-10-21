@@ -1,0 +1,52 @@
+<!-- templates/seller_inventory.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ seller.public_name }}'s Inventory</h1>
+    <p>{{ seller.summary }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if products %}
+        <div class="row">
+            {% for item in products %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <!-- Product Image -->
+                    <img src="{{ item.product.image_url }}" class="card-img-top" alt="{{ item.product.name }}" style="height: 200px; object-fit: cover;">
+                    
+                    <div class="card-body">
+                        <!-- Product Name -->
+                        <h5 class="card-title">{{ item.product.name }}</h5>
+                        
+                        <!-- Product Summary -->
+                        <p class="card-text">{{ item.product.summary }}</p>
+                        
+                        <!-- Price and Quantity -->
+                        <p class="card-text"><strong>Price:</strong> ${{ "%.2f"|format(item.product.price) }}</p>
+                        <p class="card-text"><strong>Quantity in Inventory:</strong> {{ item.quantity }}</p>
+                        
+                        <!-- Optional: Add more seller-specific actions here -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>This seller currently has no products in their inventory.</p>
+    {% endif %}
+</div>
+{% endblock %}
