@@ -1,4 +1,5 @@
 from flask import current_app as app
+from flask_login import current_user
 
 class Reviews:
     def __init__(self, review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at):
@@ -35,5 +36,5 @@ WHERE seller_id = :seller_id
 SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at
 FROM Reviews
 WHERE reviewer_id = :reviewer_id
-''', seller_id=reviewer_id)
+''', reviewer_id=reviewer_id, current_user=current_user)
         return [Reviews(*row) for row in rows]
