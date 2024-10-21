@@ -1,76 +1,77 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1>Login</h1>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center pokemon-header">User Profile</h1>
 
-<form action="" method="post" novalidate>
-  {{ form.hidden_tag() }}
-  <p>
-    {{ form.email.label }}<br/>
-    {{ form.email(size=32) }}<br/>
-    {% for error in form.email.errors %}
-    <span style="color: red;">[{{ error }}]</span>
-    {% endfor %}
-  </p>
-  <p>
-    {{ form.password.label }}<br/>
-    {{ form.password(size=32) }}<br/>
-    {% for error in form.password.errors %}
-    <span style="color: red;">[{{ error }}]</span>
-    {% endfor %}
-  </p>
-  <p>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
+    <!-- User Information -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2>{{ current_user.first_name }} {{ current_user.last_name }}</h2>
+        <p>Email: {{ current_user.email }}</p>
+        <p>Address: {{ current_user.address }}</p>
+        <p>Summary: {{ current_user.summary }}</p>
+        <!-- Add other profile information as needed -->
+      </div>
+    </div>
+
+    <!-- Past Orders -->
+    <h3 class="mt-5">Past Orders</h3>
+    {% if orders %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Order Number</th>
+          <th>Date</th>
+          <th>Total Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{{ order.number }}</td>
+          <td>{{ order.date }}</td>
+          <td>{{ order.total_amount }}</td>
+          <td>{{ order.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning text-center">
+      <p>No past orders found.</p>
+    </div>
     {% endif %}
-    {% endwith %}
-  </p>
-  {{ form.submit(class_="btn btn-black") }}
-  <a class="btn btn-secondary" href="{{ url_for('users.register') }}" role="button">Register</a>
-</form>
 
-{% endblock %}
-{% extends "base.html" %}
-
-{% block content %}
-
-<h1>Login</h1>
-
-<form action="" method="post" novalidate>
-  {{ form.hidden_tag() }}
-  <p>
-    {{ form.email.label }}<br/>
-    {{ form.email(size=32) }}<br/>
-    {% for error in form.email.errors %}
-    <span style="color: red;">[{{ error }}]</span>
-    {% endfor %}
-  </p>
-  <p>
-    {{ form.password.label }}<br/>
-    {{ form.password(size=32) }}<br/>
-    {% for error in form.password.errors %}
-    <span style="color: red;">[{{ error }}]</span>
-    {% endfor %}
-  </p>
-  <p>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-      {% for message in messages %}
-      <li>{{ message }}</li>
+    <!-- Recent Reviews -->
+    <h3 class="mt-5">Recent Reviews</h3>
+    {% if reviews %}
+    <div class="row">
+      {% for review in reviews %}
+      <div class="col-md-4">
+        <div class="card mb-4 shadow-sm border-warning">
+          <div class="card-body">
+            <h5 class="card-title" style="color: #3b4cca">
+              {{ review.title }}
+            </h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Rating: {{ review.rating }} / 5
+            </h6>
+            <p class="card-text">{{ review.content }}</p>
+            <small class="text-muted">Posted on: {{ review.date_posted }}</small>
+          </div>
+        </div>
+      </div>
       {% endfor %}
-    </ul>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">
+      <p>No reviews found.</p>
+    </div>
     {% endif %}
-    {% endwith %}
-  </p>
-  {{ form.submit(class_="btn btn-black") }}
-  <a class="btn btn-secondary" href="{{ url_for('users.register') }}" role="button">Register</a>
-</form>
+  </div>
+</body>
 
 {% endblock %}
