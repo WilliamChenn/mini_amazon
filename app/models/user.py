@@ -153,6 +153,22 @@ WHERE user_id = :user_id
                               user_id=user_id)
         return User(*rows[0]) if rows else None
 
+
+    @staticmethod
+    def update_balance(user_id, new_balance):
+        try:
+            app.db.execute("""
+    UPDATE Users
+    SET balance = :new_balance
+    WHERE user_id = :user_id
+    """,
+                        new_balance=new_balance,
+                        user_id=user_id)
+            return True
+        except Exception as e:
+            print(f"Error updating balance: {str(e)}")
+            return False
+
     def update_address(self, new_address):
         try:
             app.db.execute("""

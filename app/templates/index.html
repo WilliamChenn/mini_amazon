@@ -47,33 +47,36 @@
 <br><br>
 
 {% if current_user.is_authenticated %}
-<h2>Your recent purchases:</h2>
+<h2>Your recent orders:</h2>
 
-<!-- Card container for purchase history -->
+<!-- Card container for order history -->
 <div class="container">
   <div class="row">
-    <!-- Loop through purchase history and display each one as a card -->
-    {% for purchase in purchase_history %}
+    <!-- Loop through order history and display each one as a card -->
+    {% for order in order_history %}
     <div class="col-md-4">
       <div class="card mb-4">
         <div class="card-body">
-          <!-- Purchase ID -->
-          <p class="text-muted" style="font-size: 0.85em;">Purchase ID: {{ purchase.purchase_id }}</p>
+          <!-- Order ID -->
+          <p class="text-muted" style="font-size: 0.85em;">Order ID: {{ order.order_id }}</p>
 
-          <!-- Product ID (Could be linked to the product itself) -->
-          <p class="card-text">Product: {{ purchase.product_id }}</p>
+          <!-- Total Amount and Number of Items -->
+          <p class="card-text">Total Amount: ${{ "%.2f"|format(order.total_amount) }}</p>
+          <p class="card-text">Number of Items: {{ order.num_items }}</p>
 
-          <!-- Time of Purchase -->
-          <p class="text-muted">Purchased on: {{ purchase.time_purchased }}</p>
+          <!-- Fulfillment Status -->
+          <p class="text-muted">Status: {{ order.fulfillment_status }}</p>
+
+          <!-- Time of Order Creation -->
+          <p class="text-muted">Ordered on: {{ order.created_at }}</p>
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
 </div>
-
 {% else %}
-<p><a href="{{ url_for('users.login') }}">Log in</a> to see your purchase history!</p>
+<p><a href="{{ url_for('users.login') }}">Log in</a> to see your order history!</p>
 {% endif %}
 
 {% endblock %}

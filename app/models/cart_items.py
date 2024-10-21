@@ -19,6 +19,18 @@ WHERE cart_id = :cart_id
         return [CartItem(*row) for row in rows] if rows else []
 
     @staticmethod
+    def update_quantity(cart_item_id, quantity):
+        try:
+            app.db.execute('''
+                UPDATE Cart_Items
+                SET quantity = :quantity, added_at = CURRENT_TIMESTAMP
+                WHERE cart_item_id = :cart_item_id
+            ''', quantity=quantity, cart_item_id=cart_item_id)
+            return True
+        except Exception as e:
+            return False
+
+    @staticmethod
     def add_to_cart(cart_id, product_id, seller_id, quantity=1):
         existing_item = CartItem.find_cart_item(cart_id, product_id)
         if existing_item:

@@ -6,7 +6,7 @@ from app.models.reviews import Reviews
 
 bp = Blueprint('social', __name__)
 
-@bp.route('/recent-reviews', methods=['GET'])
+@bp.route('/profile', methods=['GET'])
 def recent_reviews():
     
     if current_user.is_authenticated:
@@ -14,7 +14,7 @@ def recent_reviews():
     else:
         reviews = None
     
-    return render_template('reviews.html', reviews=reviews)
+    return render_template('profile.html', reviews=reviews)
 
 @bp.route('/add-review', methods=['POST'])
 def add_review():
