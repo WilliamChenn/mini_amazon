@@ -104,15 +104,10 @@ def clear_cart():
 @bp.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
-    flash('Starting checkout process...', 'info')
-
     # Retrieve the user's cart
     try:
         cart = Cart.get_or_create_cart(current_user.user_id)
-        flash(f'Cart retrieved with ID: {cart.cart_id}', 'info')
-
         cart_items = CartItem.get_cart_items(cart.cart_id)
-        flash(f'Number of items in cart: {len(cart_items)}', 'info')
 
         if not cart_items:
             flash('Your cart is empty.', 'warning')
@@ -127,27 +122,15 @@ def checkout():
         order_items_data = []
 
         # Iterate through cart items
-        flash('Processing cart items...', 'info')
-        for idx, item in enumerate(cart_items, start=1):
-            flash(f'Processing item {idx}: {item}', 'info')
-            flash(f'Item type: {type(item)}', 'info')
-
-            if isinstance(item, list):
-                flash(f'Item {idx} is a list with length: {len(item)}. This is unexpected.', 'danger')
-                return redirect(url_for('cart.view_cart'))
-            elif not hasattr(item, 'quantity'):
-                flash(f'Item {idx} does not have a quantity attribute: {item}', 'danger')
+        for item in cart_items:
+            if isinstance(item, list) or not hasattr(item, 'quantity'):
+                flash('Invalid cart item detected.', 'danger')
                 return redirect(url_for('cart.view_cart'))
 
             try:
                 product = Product.get(item.product_id)
-                flash(f'Product retrieved with ID: {item.product_id}', 'info')
 
-                if not product:
-                    flash(f'Product with ID {item.product_id} does not exist.', 'danger')
-                    return redirect(url_for('cart.view_cart'))
-
-                if not product.available:
+                if not product or not product.available:
                     flash(f'Product "{product.name}" is not available for purchase.', 'warning')
                     return redirect(url_for('cart.view_cart'))
 
@@ -167,19 +150,14 @@ def checkout():
                 flash(f'Error processing item {item.product_id}: {str(e)}', 'danger')
                 return redirect(url_for('cart.view_cart'))
 
-        flash(f'Total amount calculated: ${total_amount:.2f}', 'info')
-
         # Check if buyer has sufficient balance
         new_buyer_balance = current_user.balance - total_amount
-        flash(f'Checking buyer balance: {current_user.balance} - {total_amount} = {new_buyer_balance}', 'info')
-
         if new_buyer_balance < 0:
             flash('Insufficient balance.', 'danger')
             return redirect(url_for('cart.view_cart'))
 
         # Create Order
         try:
-            flash('Creating order...', 'info')
             order = Order.create(
                 user_id=current_user.user_id,
                 total_amount=total_amount,
@@ -190,15 +168,13 @@ def checkout():
             if not order:
                 flash('Failed to create order.', 'danger')
                 return redirect(url_for('cart.view_cart'))
-            flash(f'Order created with ID: {order.order_id}', 'info')
         except Exception as e:
             flash(f'Error creating order: {str(e)}', 'danger')
             return redirect(url_for('cart.view_cart'))
 
         # Create OrderItems and Update Inventory & Seller Balances
-        for idx, item_data in enumerate(order_items_data, start=1):
+        for item_data in order_items_data:
             try:
-                flash(f'Creating order item {idx} for product ID: {item_data["product_id"]}', 'info')
                 order_item = OrderItem.create(
                     order_id=order.order_id,
                     product_id=item_data['product_id'],
@@ -213,23 +189,19 @@ def checkout():
                     flash(f'Failed to create order item for product ID: {item_data["product_id"]}', 'danger')
                     return redirect(url_for('cart.view_cart'))
             except Exception as e:
-                flash(f'Error processing order item {idx} or updating seller: {str(e)}', 'danger')
+                flash(f'Error processing order item {item_data["product_id"]} or updating seller: {str(e)}', 'danger')
                 return redirect(url_for('cart.view_cart'))
 
         # Deduct Total Amount from Buyer's Balance
         try:
-            flash(f'Deducting total amount from buyer\'s balance, new balance: {new_buyer_balance}', 'info')
             User.update_balance(user_id=current_user.user_id, new_balance=new_buyer_balance)
-            flash(f'Buyer\'s balance updated to {new_buyer_balance}', 'info')
         except Exception as e:
             flash(f'Error updating buyer balance: {str(e)}', 'danger')
             return redirect(url_for('cart.view_cart'))
 
         # Clear Cart
         try:
-            flash('Clearing cart...', 'info')
             CartItem.clear_cart(cart.cart_id)
-            flash(f'Checkout successful! Total amount: ${total_amount:.2f}', 'success')
         except Exception as e:
             flash(f'Error clearing cart: {str(e)}', 'danger')
             return redirect(url_for('cart.view_cart'))
@@ -239,4 +211,5 @@ def checkout():
         flash(f'An error occurred during checkout: {str(e)}', 'danger')
         return redirect(url_for('cart.view_cart'))
     
+    flash('Checkout successful!', 'success')
     return redirect(url_for('cart.view_cart'))
