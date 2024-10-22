@@ -21,15 +21,17 @@
     {% endfor %}
   </p>
   <p>
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     <ul>
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
+        {% for category, message in messages %}
+        {% if category != 'inventory_update' %} <!-- Ignore inventory update messages on the login page -->
+        <li>{{ message }}</li>
+        {% endif %}
+        {% endfor %}
     </ul>
     {% endif %}
-    {% endwith %}
+{% endwith %}
   </p>
   {{ form.submit(class_="btn btn-black") }}
   <a class="btn btn-secondary" href="{{ url_for('users.register') }}" role="button">Register</a>

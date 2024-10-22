@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <h1 class="text-center">Seller Inventory</h1>
+
+  <!-- Seller Inventory List -->
+  <div class="row">
+    {% if inventory %}
+    <div class="col-md-12">
+      <form method="POST" action="{{ url_for('seller.inventory') }}">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Last Modified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in inventory %}
+            <tr>
+              <!-- Product Name Input -->
+              <td>
+                <textarea name="product_name_{{ loop.index }}" class="form-control" rows="2" style="width: 250px;">{{ item.name }}</textarea>
+              </td>                        
+              
+              <!-- Price Input with Up/Down Buttons -->
+              <td style="width: 250px;">
+                <div class="input-group">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('price_{{ loop.index }}', -1, false)">-</button>
+                  </span>
+                  <input type="number" id="price_{{ loop.index }}" name="price_{{ loop.index }}" class="form-control" value="{{ item.price }}" step="0.01">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('price_{{ loop.index }}', 1, false)">+</button>
+                  </span>
+                </div>
+              </td>              
+              
+              <!-- Quantity Input with Up/Down Buttons -->
+              <td>
+                <div class="input-group">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('quantity_{{ loop.index }}', -1, true)">-</button>
+                  </span>
+                  <input type="number" id="quantity_{{ loop.index }}" name="quantity_{{ loop.index }}" class="form-control" value="{{ item.quantity }}" step="1" min="0">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('quantity_{{ loop.index }}', 1, true)">+</button>
+                  </span>
+                </div>
+              </td>
+
+              <!-- Last Modified Column -->
+              <td>
+                {{ item.last_modified.strftime('%Y-%m-%d %H:%M:%S') }}
+              </td>
+              
+              <td>
+                <button type="submit" class="btn btn-success">Save</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </form>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">
+      <p>No inventory found.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- JavaScript to handle button clicks for price and quantity -->
+<script>
+  function changeValue(elementId, step, isInteger) {
+    var element = document.getElementById(elementId);
+    var currentValue = parseFloat(element.value);
+    var newValue = currentValue + step;
+
+    // Prevent negative values
+    if (newValue < 0) {
+      newValue = 0;
+    }
+
+    // If it's an integer field (quantity), round it and ensure no decimals
+    if (isInteger) {
+      element.value = Math.round(newValue);
+    } else {
+      element.value = newValue.toFixed(2);  // Update the input value with two decimal places for price
+    }
+  }
+</script>
+
+{% endblock %}
