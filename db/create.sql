@@ -34,6 +34,14 @@ CREATE TABLE Products (
     available BOOLEAN DEFAULT TRUE  -- Add available column
 );
 
+-- Create Seller_Products table to support many-to-many relationship between sellers and products
+CREATE TABLE Seller_Products (
+    seller_id INT NOT NULL REFERENCES Users(user_id),  -- References Users table for sellers
+    product_id INT NOT NULL REFERENCES Products(product_id),  -- References Products table
+    PRIMARY KEY (seller_id, product_id)
+);
+
+
 
 -- Create Product_Categories table (many-to-many relationship)
 CREATE TABLE Product_Categories (
