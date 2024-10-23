@@ -44,9 +44,6 @@ def profile():
     return render_template('profile.html', reviews=reviews, orders_with_items=orders_with_items)
 
 
-
-
-
 @bp.route('/add-review', methods=['POST'])
 def add_review():
     # Parse the JSON payload

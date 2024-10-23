@@ -1,40 +1,79 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
 
-{% block content %}
-
-<br><br>
+<br /><br />
 
 <h1>Products for sale:</h1>
 
-<!-- Card container for products -->
 <div class="container">
-  <div class="row">
+  <!-- Filter Input Box for Price -->
+  <div class="row mb-4">
+    <div class="col-md-6 offset-md-3">
+      <div class="row">
+        <!-- Min Price Input -->
+        <div class="col-md-6">
+          <label for="minPrice">Min Price:</label>
+          <input
+            type="number"
+            id="minPrice"
+            class="form-control"
+            placeholder="Min Price"
+          />
+        </div>
+        <!-- Max Price Input -->
+        <div class="col-md-6">
+          <label for="maxPrice">Max Price:</label>
+          <input
+            type="number"
+            id="maxPrice"
+            class="form-control"
+            placeholder="Max Price"
+          />
+        </div>
+        <div class="col-md-6">
+          <button type="submit", id="maxPrice", onclick="filterProducts()">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Products:</h2>
+
+  <div class="row" id="productContainer">
     <!-- Loop through available products and display each one as a card -->
     {% for product in avail_products %}
-    <div class="col-md-4">
+    <div class="col-md-4 product-card" data-price="{{ product.price }}">
       <div class="card mb-4">
         <!-- Product Image -->
-        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+        <img
+          src="{{ product.image_url }}"
+          class="card-img-top"
+          alt="{{ product.name }}"
+        />
 
         <div class="card-body">
           <!-- Product Name -->
           <h5 class="card-title">{{ product.name }}</h5>
 
           <!-- Smaller Product ID -->
-          <p class="text-muted" style="font-size: 0.85em;">Product ID: {{ product.product_id }}</p>
+          <p class="text-muted" style="font-size: 0.85em">
+            Product ID: {{ product.product_id }}
+          </p>
 
           <!-- Product Summary -->
           <p class="card-text">{{ product.summary }}</p>
 
           <!-- Price in bold -->
-          <p class="card-price font-weight-bold">Price: ${{ "%.2f"|format(product.price) }}</p>
+          <p class="card-price font-weight-bold">
+            Price: ${{ "%.2f"|format(product.price) }}
+          </p>
 
           <!-- Buy Now Form -->
-          <form action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}" method="POST">
-            <!-- If using Flask-WTF for CSRF protection -->
-            {% if csrf_token %}
-              {{ csrf_token() }}
-            {% endif %}
+          <form
+            action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}"
+            method="POST"
+          >
+            <!-- CSRF protection -->
+            {% if csrf_token %} {{ csrf_token() }} {% endif %}
             <button type="submit" class="btn btn-primary">Buy Now</button>
           </form>
         </div>
@@ -44,7 +83,31 @@
   </div>
 </div>
 
-<br><br>
+<script>
+  function filterProducts() {
+    // Get the min and max price from the input fields
+    let minPrice = parseFloat(document.getElementById("minPrice").value) || 0;
+    let maxPrice =
+      parseFloat(document.getElementById("maxPrice").value) || Infinity;
+
+    // Get all the product cards
+    let productCards = document.querySelectorAll(".product-card");
+
+    // Loop through each product card and filter by price
+    productCards.forEach((card) => {
+      let productPrice = parseFloat(card.getAttribute("data-price"));
+
+      // Show the card if the product price is within the range
+      if (productPrice >= minPrice && productPrice <= maxPrice) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+</script>
+
+<br /><br />
 
 {% if current_user.is_authenticated %}
 <h2>Your recent orders:</h2>
@@ -58,10 +121,14 @@
       <div class="card mb-4">
         <div class="card-body">
           <!-- Order ID -->
-          <p class="text-muted" style="font-size: 0.85em;">Order ID: {{ order.order_id }}</p>
+          <p class="text-muted" style="font-size: 0.85em">
+            Order ID: {{ order.order_id }}
+          </p>
 
           <!-- Total Amount and Number of Items -->
-          <p class="card-text">Total Amount: ${{ "%.2f"|format(order.total_amount) }}</p>
+          <p class="card-text">
+            Total Amount: ${{ "%.2f"|format(order.total_amount) }}
+          </p>
           <p class="card-text">Number of Items: {{ order.num_items }}</p>
 
           <!-- Fulfillment Status -->
@@ -76,7 +143,7 @@
   </div>
 </div>
 {% else %}
-<p><a href="{{ url_for('users.login') }}">Log in</a> to see your order history!</p>
-{% endif %}
-
-{% endblock %}
+<p>
+  <a href="{{ url_for('users.login') }}">Log in</a> to see your order history!
+</p>
+{% endif %} {% endblock %}
