@@ -58,6 +58,7 @@ def add_review():
     # Use the authenticated user's ID as reviewer_id
     reviewer_id = data.get('reviewer_id')  # Or use current_user.id if authenticated
     
+    
     # TODO: Add validation and customer authentication
 
     # Create the review
