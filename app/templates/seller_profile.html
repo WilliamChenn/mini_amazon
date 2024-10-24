@@ -1,0 +1,92 @@
+<!-- templates/seller_profile.html -->
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <h1 class="text-center">Seller Profile</h1>
+
+  <!-- Button to List a New Product -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('seller.create_product') }}" class="btn btn-primary">List a New Product</a>
+  </div>
+
+  <!-- Seller Inventory List -->
+  <div class="row mt-4">
+    {% if products %}
+    <div class="col-md-12">
+      <form method="POST" action="{{ url_for('seller.inventory') }}">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>Price ($)</th>
+              <th>Quantity</th>
+              <th>Last Modified</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <!-- Hidden Input for Product ID -->
+              <input type="hidden" name="product_id" value="{{ product.product_id }}">
+
+              <!-- Product Name -->
+              <td>{{ product.name }}</td>
+
+              <!-- Price -->
+              <td>{{ "%.2f"|format(product.price) }}</td>
+
+              <!-- Quantity Input -->
+              <td>
+                <div class="input-group">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('quantity_{{ product.product_id }}', -1)">-</button>
+                  </span>
+                  <input type="number" id="quantity_{{ product.product_id }}" name="quantity" class="form-control" value="{{ inventory[product.product_id].quantity if inventory.get(product.product_id) else 0 }}" step="1" min="0">
+                  <span class="input-group-btn">
+                    <button type="button" class="btn btn-outline-secondary" onclick="changeValue('quantity_{{ product.product_id }}', 1)">+</button>
+                  </span>
+                </div>
+              </td>
+
+              <!-- Last Modified -->
+              <td>
+                {% if inventory.get(product.product_id) %}
+                  {{ inventory[product.product_id].updated_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">Update Inventory</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">
+      <p>No products found. Start by listing a new product!</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- JavaScript to handle button clicks for quantity -->
+<script>
+  function changeValue(elementId, step) {
+    var element = document.getElementById(elementId);
+    var currentValue = parseInt(element.value);
+    var newValue = currentValue + step;
+
+    // Prevent negative values
+    if (newValue < 0) {
+      newValue = 0;
+    }
+
+    element.value = newValue;
+  }
+</script>
+
+{% endblock %}

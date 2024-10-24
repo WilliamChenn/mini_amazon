@@ -53,11 +53,9 @@ LIMIT 1
                 SET quantity = :quantity, updated_at = CURRENT_TIMESTAMP
                 WHERE inventory_id = :inventory_id
             ''', quantity=new_quantity, inventory_id=inventory_id)
-            app.db.commit()
             return True
         except Exception as e:
             app.logger.error(f"Error updating inventory {inventory_id}: {e}")
-            app.db.rollback()
             return False
 
     @staticmethod
@@ -68,9 +66,7 @@ LIMIT 1
                 VALUES (:seller_id, :product_id, :quantity)
                 RETURNING inventory_id, seller_id, product_id, quantity, updated_at
             ''', seller_id=seller_id, product_id=product_id, quantity=quantity)
-            app.db.commit()
             return Inventory(*rows[0]) if rows else None
         except Exception as e:
             app.logger.error(f"Error creating inventory for product {product_id}: {e}")
-            app.db.rollback()
             return None

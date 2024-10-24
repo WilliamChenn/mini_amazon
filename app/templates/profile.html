@@ -83,6 +83,12 @@
     <p>No reviews found.</p>
   </div>
   {% endif %}
+  {% if current_user.is_seller %}
+    <!-- Seller Information -->
+    <div class="text-center mt-4">
+      <a href="{{ url_for('seller.inventory') }}" class="btn btn-primary">Seller Profile</a>
+    </div>
+  {% endif %}
 </div>
 
 {% endblock %}
