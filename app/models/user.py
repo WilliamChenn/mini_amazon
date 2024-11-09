@@ -154,19 +154,59 @@ WHERE user_id = :user_id
         return User(*rows[0]) if rows else None
 
 
-    @staticmethod
-    def update_balance(user_id, new_balance):
+    def update_balance(self, new_balance):
         try:
             app.db.execute("""
-    UPDATE Users
-    SET balance = :new_balance
-    WHERE user_id = :user_id
-    """,
+UPDATE Users
+SET balance = :new_balance
+WHERE user_id = :user_id
+""",
                         new_balance=new_balance,
-                        user_id=user_id)
+                        user_id=self.user_id)
+            self.balance = new_balance
             return True
         except Exception as e:
             print(f"Error updating balance: {str(e)}")
+            return False
+
+    def change_password(self, new_password):
+        try:
+            hashed_password = generate_password_hash(new_password)
+            app.db.execute("""
+UPDATE Users
+SET password = :hashed_password
+WHERE user_id = :user_id
+""",
+                hashed_password=hashed_password,
+                user_id=self.user_id)
+            return True
+        except Exception as e:
+            print(f"Error changing password: {str(e)}")
+            return False
+
+    def change_email(self, new_email):
+        try:
+            # Check if new email already exists
+            existing_user = app.db.execute("""
+SELECT user_id
+FROM Users
+WHERE email = :new_email
+""",
+                new_email=new_email)
+            if existing_user:
+                print("Email already in use.")
+                return False
+            app.db.execute("""
+UPDATE Users
+SET email = :new_email
+WHERE user_id = :user_id
+""",
+                new_email=new_email,
+                user_id=self.user_id)
+            self.email = new_email
+            return True
+        except Exception as e:
+            print(f"Error changing email: {str(e)}")
             return False
 
     def update_address(self, new_address):
@@ -183,7 +223,7 @@ WHERE user_id = :user_id
         except Exception as e:
             print(f"Error updating address: {str(e)}")
             return False
-
+    
     def update_summary(self, new_summary):
         try:
             app.db.execute("""
@@ -197,4 +237,34 @@ WHERE user_id = :user_id
             return True
         except Exception as e:
             print(f"Error updating summary: {str(e)}")
+            return False
+        
+    def update_first_name(self, new_first_name):
+        try:
+            app.db.execute("""
+            UPDATE Users
+            SET first_name = :new_first_name
+            WHERE user_id = :user_id
+            """,
+            new_first_name=new_first_name,
+            user_id=self.user_id)
+            self.first_name = new_first_name
+            return True
+        except Exception as e:
+            print(f"Error updating first name: {str(e)}")
+            return False
+
+    def update_last_name(self, new_last_name):
+        try:
+            app.db.execute("""
+            UPDATE Users
+            SET last_name = :new_last_name
+            WHERE user_id = :user_id
+            """,
+            new_last_name=new_last_name,
+            user_id=self.user_id)
+            self.last_name = new_last_name
+            return True
+        except Exception as e:
+            print(f"Error updating last name: {str(e)}")
             return False

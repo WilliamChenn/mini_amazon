@@ -1,9 +1,10 @@
-from flask import Blueprint, jsonify, render_template, request
-from flask_login import current_user
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
 import datetime
 
+from app.models.user import User
+
 from .models.product import Product
-#from .models.purchase import Purchase
 from .models.orders import Order  # Updated import
 from .models.order_items import OrderItem
 
@@ -44,6 +45,58 @@ def profile():
     return render_template('profile.html', reviews=reviews, orders_with_items=orders_with_items)
 
 
+@bp.route('/profile/update', methods=['GET', 'POST'])
+@login_required
+def update_profile():
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        address = request.form.get('address')
+        summary = request.form.get('summary')
+        balance = request.form.get('balance')
+        password = request.form.get('password')
+
+        # Validate and update email
+        if email != current_user.email and User.email_exists(email):
+            flash('Email already in use.', 'danger')
+            # Render the template with existing form data
+            return render_template('update_profile.html', 
+                                   first_name=first_name,
+                                   last_name=last_name,
+                                   email=email,
+                                   address=address,
+                                   summary=summary,
+                                   balance=balance)
+        
+        # Update email if changed
+        if email != current_user.email:
+            current_user.change_email(email)
+
+        # Update other attributes
+        current_user.update_first_name(first_name)
+        current_user.update_last_name(last_name)
+        current_user.update_address(address)
+        current_user.update_summary(summary)
+        current_user.update_balance(balance)
+
+        # Update password if provided
+        if password:
+            current_user.change_password(password)
+
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('profile.profile'))
+    else:
+        return render_template('update_profile.html',
+                               first_name=current_user.first_name,
+                               last_name=current_user.last_name,
+                               email=current_user.email,
+                               address=current_user.address,
+                               summary=current_user.summary,
+                               balance=current_user.balance)
+
+
 @bp.route('/add-review', methods=['POST'])
 def add_review():
     # Parse the JSON payload
@@ -74,3 +127,4 @@ def add_review():
         return jsonify({'message': 'Review added successfully.'}), 201
     else:
         return jsonify({'error': 'Failed to add review.'}), 500
+    
