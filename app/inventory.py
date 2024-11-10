@@ -14,36 +14,31 @@ bp = Blueprint('seller', __name__, url_prefix='/seller')
 @login_required
 def inventory():
     if request.method == 'POST':
-        # Update inventory based on form data
-        product_ids = request.form.getlist('product_id')
-        quantities = request.form.getlist('quantity')
-
-        # Iterate over the products and update quantities
+        product_ids = request.form.getlist('product_ids[]')
+        quantities = request.form.getlist('quantities[]')
         for product_id, quantity in zip(product_ids, quantities):
             try:
-                quantity = int(quantity)
                 product_id = int(product_id)
+                quantity = int(quantity)
                 inventory = Inventory.get_by_product_and_seller(product_id, current_user.id)
                 if inventory:
-                    Inventory.update_quantity(inventory.inventory_id, quantity)
+                    success = Inventory.update_quantity(inventory.inventory_id, quantity)
+                    if not success:
+                        flash(f'Failed to update inventory for product ID {product_id}.', 'danger')
                 else:
-                    # Create inventory record if it doesn't exist
-                    Inventory.create_inventory(current_user.id, product_id, quantity)
+                    inventory = Inventory.create_inventory(current_user.id, product_id, quantity)
+                    if not inventory:
+                        flash(f'Failed to create inventory for product ID {product_id}.', 'danger')
             except ValueError:
                 flash(f'Invalid quantity for product ID {product_id}', 'danger')
                 continue
-
         flash('Inventory updated successfully!', 'success')
-        return redirect(url_for('seller.inventory'))
-
+        return redirect(url_for('profile.profile'))
+    
     # GET request - display inventory
-    # Get the seller's products
     products = Product.get_by_seller(current_user.id)
-
-    # Get inventory for the seller
     inventory_list = Inventory.get_by_seller(current_user.id)
     inventory_dict = {inv.product_id: inv for inv in inventory_list}
-
     return render_template('seller_profile.html', title='Seller Inventory Data', products=products, inventory=inventory_dict)
 
 @bp.route('/create_product', methods=['GET', 'POST'])
@@ -93,7 +88,7 @@ def create_product():
             )
 
             flash('Product listed successfully!', 'success')
-            return redirect(url_for('seller.inventory'))
+            return redirect(url_for('profile.profile'))
         else:
             flash('An error occurred while listing the product.', 'danger')
             return redirect(url_for('seller.create_product'))
@@ -101,3 +96,14 @@ def create_product():
         # For GET request, fetch categories to populate dropdown
         categories = Category.get_all()
         return render_template('create_product.html', title='List a New Product', categories=categories)
+
+# app/models/inventory.py
+@staticmethod
+def get_by_product_and_seller(product_id, seller_id):
+    rows = app.db.execute('''
+SELECT inventory_id, seller_id, product_id, quantity, updated_at
+FROM Inventory
+WHERE product_id = :product_id AND seller_id = :seller_id
+LIMIT 1
+''', product_id=product_id, seller_id=seller_id)
+    return Inventory(*rows[0]) if rows else None

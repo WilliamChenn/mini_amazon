@@ -36,24 +36,40 @@ def view_cart():
 @bp.route('/add/<int:product_id>', methods=['POST'])
 @login_required
 def add_to_cart(product_id):
-    # Retrieve the product details
     product = Product.get(product_id)
     if not product or not product.available:
         flash('Product not available.', 'danger')
         return redirect(url_for('index.index'))
 
-    # Retrieve or create the user's cart
-    cart = Cart.get_or_create_cart(current_user.user_id)
+    # Get data from form
+    try:
+        quantity = int(request.form.get('quantity', 1))
+        seller_id = int(request.form.get('seller_id'))
+        if quantity < 1:
+            raise ValueError
+    except (ValueError, TypeError):
+        flash('Invalid input.', 'danger')
+        return redirect(url_for('products.product_page', product_id=product_id))
 
-    # Add to cart (handles updating quantity if item exists)
+    # Check inventory
+    inventory = Inventory.get_by_product_and_seller(product_id, seller_id)
+    if not inventory:
+        flash('Seller does not have this product.', 'danger')
+        return redirect(url_for('products.product_page', product_id=product_id))
+
+    if inventory.quantity < quantity:
+        flash(f'Requested quantity exceeds available inventory ({inventory.quantity}).', 'danger')
+        return redirect(url_for('products.product_page', product_id=product_id))
+
+    cart = Cart.get_or_create_cart(current_user.user_id)
     CartItem.add_to_cart(
         cart_id=cart.cart_id,
         product_id=product.product_id,
-        seller_id=product.seller_id,
-        quantity=1  # You can modify this to accept quantity from the form
+        seller_id=seller_id,
+        quantity=quantity
     )
 
-    flash(f'Added {product.name} to your cart.', 'success')
+    flash(f'Added {quantity} x {product.name} to your cart.', 'success')
     return redirect(url_for('cart.view_cart'))
 
 @bp.route('/remove/<int:cart_item_id>', methods=['POST'])
@@ -104,44 +120,38 @@ def clear_cart():
 @bp.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
-    # Retrieve the user's cart
     try:
         cart = Cart.get_or_create_cart(current_user.user_id)
         cart_items = CartItem.get_cart_items(cart.cart_id)
-
         if not cart_items:
             flash('Your cart is empty.', 'warning')
             return redirect(url_for('cart.view_cart'))
     except Exception as e:
         flash(f'Error retrieving cart or cart items: {str(e)}', 'danger')
         return redirect(url_for('cart.view_cart'))
-
+    
     try:
         total_amount = 0
         num_items = 0
         order_items_data = []
-
-        # Iterate through cart items
+        
         for item in cart_items:
-            if isinstance(item, list) or not hasattr(item, 'quantity'):
-                flash('Invalid cart item detected.', 'danger')
-                return redirect(url_for('cart.view_cart'))
-
             try:
                 product = Product.get(item.product_id)
-
                 if not product or not product.available:
                     flash(f'Product "{product.name}" is not available for purchase.', 'warning')
                     return redirect(url_for('cart.view_cart'))
-
-                # Calculate totals
+                
+                inventory = Inventory.get_by_product_and_seller(item.product_id, item.seller_id)
+                if not inventory or inventory.quantity < item.quantity:
+                    flash(f'Insufficient inventory for "{product.name}".', 'danger')
+                    return redirect(url_for('cart.view_cart'))
+                
                 total_amount += product.price * item.quantity
                 num_items += item.quantity
-
-                # Prepare OrderItem data
                 order_items_data.append({
                     'product_id': product.product_id,
-                    'seller_id': product.seller_id,
+                    'seller_id': item.seller_id,
                     'quantity': item.quantity,
                     'unit_price': product.price,
                     'total_price': product.price * item.quantity
@@ -149,63 +159,47 @@ def checkout():
             except Exception as e:
                 flash(f'Error processing item {item.product_id}: {str(e)}', 'danger')
                 return redirect(url_for('cart.view_cart'))
-
-        # Check if buyer has sufficient balance
+        
+        # Check buyer's balance
         new_buyer_balance = current_user.balance - total_amount
         if new_buyer_balance < 0:
             flash('Insufficient balance.', 'danger')
             return redirect(url_for('cart.view_cart'))
-
+        
         # Create Order
-        try:
-            order = Order.create(
-                user_id=current_user.user_id,
-                total_amount=total_amount,
-                num_items=num_items,
-                fulfillment_status='Pending'
-            )
-
-            if not order:
-                flash('Failed to create order.', 'danger')
-                return redirect(url_for('cart.view_cart'))
-        except Exception as e:
-            flash(f'Error creating order: {str(e)}', 'danger')
+        order = Order.create(
+            user_id=current_user.user_id,
+            total_amount=total_amount,
+            num_items=num_items,
+            fulfillment_status='Pending'
+        )
+        if not order:
+            flash('Failed to create order.', 'danger')
             return redirect(url_for('cart.view_cart'))
-
+        
         # Create OrderItems and Update Inventory & Seller Balances
         for item_data in order_items_data:
-            try:
-                order_item = OrderItem.create(
-                    order_id=order.order_id,
-                    product_id=item_data['product_id'],
-                    seller_id=item_data['seller_id'],
-                    quantity=item_data['quantity'],
-                    unit_price=item_data['unit_price'],
-                    total_price=item_data['total_price'],
-                    fulfillment_status='Pending'
-                )
-
-                if not order_item:
-                    flash(f'Failed to create order item for product ID: {item_data["product_id"]}', 'danger')
-                    return redirect(url_for('cart.view_cart'))
-            except Exception as e:
-                flash(f'Error processing order item {item_data["product_id"]} or updating seller: {str(e)}', 'danger')
+            order_item = OrderItem.create(**item_data, order_id=order.order_id)
+            if not order_item:
+                flash(f'Failed to create order item for product ID: {item_data["product_id"]}', 'danger')
                 return redirect(url_for('cart.view_cart'))
-
-        # Deduct Total Amount from Buyer's Balance
-        try:
-            User.update_balance(user_id=current_user.user_id, new_balance=new_buyer_balance)
-        except Exception as e:
-            flash(f'Error updating buyer balance: {str(e)}', 'danger')
-            return redirect(url_for('cart.view_cart'))
-
+            
+            # Decrement Inventory
+            Inventory.update_quantity(
+                inventory_id=Inventory.get_by_product_and_seller(
+                    item_data['product_id'], item_data['seller_id']
+                ).inventory_id,
+                new_quantity=Inventory.get_by_product_and_seller(
+                    item_data['product_id'], item_data['seller_id']
+                ).quantity - item_data['quantity']
+            )
+        
+       # Deduct Total Amount from Buyer's Balance
+        current_user.update_balance(new_balance=new_buyer_balance)
+        
         # Clear Cart
-        try:
-            CartItem.clear_cart(cart.cart_id)
-        except Exception as e:
-            flash(f'Error clearing cart: {str(e)}', 'danger')
-            return redirect(url_for('cart.view_cart'))
-
+        CartItem.clear_cart(cart.cart_id)
+        
     except Exception as e:
         app.logger.error(f"Checkout Error: {e}")
         flash(f'An error occurred during checkout: {str(e)}', 'danger')

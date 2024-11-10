@@ -28,13 +28,13 @@ WHERE product_id = :product_id
     
     @staticmethod
     def get_by_product_and_seller(product_id, seller_id):
-        row = app.db.execute('''
-SELECT inventory_id, seller_id, product_id, quantity, updated_at
-FROM Inventory
-WHERE product_id = :product_id AND seller_id = :seller_id
-LIMIT 1
-''', product_id=product_id, seller_id=seller_id)
-        return Inventory(*row) if row else None
+        rows = app.db.execute('''
+            SELECT inventory_id, seller_id, product_id, quantity, updated_at
+            FROM Inventory
+            WHERE product_id = :product_id AND seller_id = :seller_id
+            LIMIT 1
+        ''', product_id=product_id, seller_id=seller_id)
+        return Inventory(*rows[0]) if rows else None
     
     @staticmethod
     def get_by_product_id(product_id):
@@ -45,14 +45,16 @@ LIMIT 1
         ''', product_id=product_id)
         return Inventory(*rows[0]) if rows else None
 
-    @staticmethod
+    @staticmethod 
     def update_quantity(inventory_id, new_quantity):
         try:
             app.db.execute('''
                 UPDATE Inventory
-                SET quantity = :quantity, updated_at = CURRENT_TIMESTAMP
+                SET quantity = :quantity,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE inventory_id = :inventory_id
             ''', quantity=new_quantity, inventory_id=inventory_id)
+            #app.db.commit()
             return True
         except Exception as e:
             app.logger.error(f"Error updating inventory {inventory_id}: {e}")
@@ -66,6 +68,7 @@ LIMIT 1
                 VALUES (:seller_id, :product_id, :quantity)
                 RETURNING inventory_id, seller_id, product_id, quantity, updated_at
             ''', seller_id=seller_id, product_id=product_id, quantity=quantity)
+           # app.db.commit()
             return Inventory(*rows[0]) if rows else None
         except Exception as e:
             app.logger.error(f"Error creating inventory for product {product_id}: {e}")

@@ -169,6 +169,7 @@ WHERE user_id = :user_id
             print(f"Error updating balance: {str(e)}")
             return False
 
+
     def change_password(self, new_password):
         try:
             hashed_password = generate_password_hash(new_password)

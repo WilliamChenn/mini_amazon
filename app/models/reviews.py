@@ -58,4 +58,3 @@ class Reviews:
         except Exception as e:
             print(f"Error creating review: {e}")
             return False
-        

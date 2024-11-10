@@ -1,3 +1,5 @@
+<!-- Redirected to profile.html after updating inventory -->
+
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
@@ -13,7 +15,7 @@
       {% endfor %}
     {% endif %}
   {% endwith %}
-  <h1 class="text-center">User Profile</h1>
+  <h1 class="text-center">Your Profile</h1>
 
   <!-- User Information -->
   <div class="card mb-4">
@@ -102,9 +104,8 @@
   </div>
   {% endif %}
   {% if current_user.is_seller %}
-  <!-- Seller Information -->
   <div class="text-center mt-4">
-    <a href="{{ url_for('seller.inventory') }}" class="btn btn-primary">Seller Profile</a>
+    <a href="{{ url_for('seller.inventory') }}" class="btn btn-primary">View Inventory</a>
   </div>
   {% endif %}
 </div>

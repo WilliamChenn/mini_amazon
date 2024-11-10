@@ -2,6 +2,12 @@
 
 <br /><br />
 
+<!-- templates/base.html (or the relevant header template) -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{{ url_for('index.index') }}">Welcome to Pokezon</a>
+  <!-- Rest of the navigation items -->
+</nav>
+
 <h1>Products for sale:</h1>
 
 <div class="container">
@@ -41,33 +47,36 @@
   <div class="row" id="productContainer">
     <!-- Loop through available products and display each one as a card -->
     {% for product in avail_products %}
+    <!-- Get total quantity from the passed data -->
+    {% set total_quantity = product_quantities[product.product_id] %}
     <div class="col-md-4 product-card" data-price="{{ product.price }}">
       <div class="card mb-4">
-        <!-- Product Image -->
-        <img
-          src="{{ product.image_url }}"
-          class="card-img-top"
-          alt="{{ product.name }}"
-        />
-
+        <!-- Wrap the image and product details in a link -->
+        <a href="{{ url_for('products.product_page', product_id=product.product_id) }}" style="text-decoration: none; color: inherit;">
+          <!-- Product Image -->
+          <img
+            src="{{ product.image_url }}"
+            class="card-img-top"
+            alt="{{ product.name }}"
+          />
+          <div class="card-body">
+            <!-- Product Name -->
+            <h5 class="card-title">{{ product.name }}</h5>
+            <!-- Smaller Product ID -->
+            <p class="text-muted" style="font-size: 0.85em">
+              Product ID: {{ product.product_id }}
+            </p>
+            <!-- Product Summary -->
+            <p class="card-text">{{ product.summary }}</p>
+            <!-- Price in bold -->
+            <p class="card-price font-weight-bold">
+              Price: ${{ "%.2f"|format(product.price) }}
+            </p>
+          </div>
+        </a>
+        <!-- Buy Now Form outside the link -->
         <div class="card-body">
-          <!-- Product Name -->
-          <h5 class="card-title">{{ product.name }}</h5>
-
-          <!-- Smaller Product ID -->
-          <p class="text-muted" style="font-size: 0.85em">
-            Product ID: {{ product.product_id }}
-          </p>
-
-          <!-- Product Summary -->
-          <p class="card-text">{{ product.summary }}</p>
-
-          <!-- Price in bold -->
-          <p class="card-price font-weight-bold">
-            Price: ${{ "%.2f"|format(product.price) }}
-          </p>
-
-          <!-- Buy Now Form -->
+          {% if total_quantity > 0 %}
           <form
             action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}"
             method="POST"
@@ -76,6 +85,9 @@
             {% if csrf_token %} {{ csrf_token() }} {% endif %}
             <button type="submit" class="btn btn-primary">Buy Now</button>
           </form>
+          {% else %}
+          <p class="text-danger text-center">Currently unavailable.</p>
+          {% endif %}
         </div>
       </div>
     </div>

@@ -4,6 +4,8 @@ from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.seller_products import SellerProduct  # Assuming you have this model
 from datetime import datetime
+from app.models.reviews import Reviews
+from app.models.user import User  # Import the User model
 
 bp = Blueprint('products', __name__, url_prefix='/products')
 
@@ -61,3 +63,40 @@ def create_product():
     else:
         # Render the product creation form
         return render_template('create_product.html')
+
+@bp.route('/<int:product_id>')
+def product_page(product_id):
+    product = Product.get(product_id)
+    if not product:
+        flash('Product not found.', 'danger')
+        return redirect(url_for('index.index'))
+
+    # Get sellers with inventory for the product
+    inventory = Inventory.get_by_product(product_id)
+    sellers = []
+    for inv in inventory:
+        seller = User.get(inv.seller_id)
+        if inv.quantity > 0 and seller:
+            sellers.append({
+                'seller': seller,
+                'quantity': inv.quantity
+            })
+
+    # Get reviews for the product
+    reviews = Reviews.get_by_product(product_id)
+    average_rating = None
+    if reviews:
+        average_rating = sum(review.rating for review in reviews) / len(reviews)
+
+        # Fetch reviewer information and attach to each review
+        for review in reviews:
+            reviewer = User.get(review.reviewer_id)
+            review.reviewer = reviewer  # Attach reviewer to review
+
+    return render_template(
+        'product.html',
+        product=product,
+        reviews=reviews,
+        average_rating=average_rating,
+        sellers=sellers
+    )
