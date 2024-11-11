@@ -1,6 +1,7 @@
 from flask import render_template, request
 from flask_login import current_user
 import datetime
+import math
 
 from .models.product import Product
 from .models.orders import Order
@@ -56,6 +57,17 @@ def index():
         total_quantity = sum(inv.quantity for inv in inventory_list)
         product_quantities[product.product_id] = total_quantity
 
+    # Pagination setup
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+    total_products = len(products)
+    total_pages = math.ceil(total_products / per_page)
+
+    # Slice products for current page
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_products = products[start:end]
+
     # Find the orders current user has made since a specific date
     if current_user.is_authenticated:
         since_date = datetime.datetime(1980, 9, 14)
@@ -66,8 +78,10 @@ def index():
     # Pass the data to the template
     return render_template(
         'index.html',
-        avail_products=products,
+        avail_products=paginated_products,
         order_history=orders,
         product_quantities=product_quantities,
-        categories=category_tree
+        categories=category_tree,
+        page=page,
+        total_pages=total_pages
     )
