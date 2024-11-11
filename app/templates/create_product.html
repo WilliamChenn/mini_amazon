@@ -4,10 +4,23 @@
 <div class="container mt-5">
   <h1 class="text-center">List a New Product</h1>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
   <form method="POST" action="{{ url_for('products.create_product') }}">
     <div class="form-group">
       <label for="name">Product Name*</label>
-      <input type="text" name="name" id="name" class="form-control" required>
+      <input type="text" name="name" id="name" class="form-control" required value="{{ form_data.get('name', '') }}">
     </div>
 
     <div class="form-group">
@@ -26,8 +39,20 @@
     </div>
 
     <div class="form-group">
-      <label for="category_id">Category ID*</label>
-      <input type="number" name="category_id" id="category_id" class="form-control" required>
+      <label for="category_id">Category*</label>
+      <div id="category-selectors">
+        <select name="category_id" id="category_id_0" class="form-control" required onchange="loadChildCategories(0)">
+          <option value="">Select Category</option>
+          {% for category in categories %}
+          {% if not category.parent_id %}
+          <option value="{{ category.category_id }}">{{ category.category_name }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <small class="form-text text-muted">
+        Don't see your category? <a href="{{ url_for('categories.create_category') }}">Create a new one</a>
+      </small>
     </div>
 
     <div class="form-group">
@@ -38,5 +63,50 @@
     <button type="submit" class="btn btn-primary">Create Product</button>
   </form>
 </div>
+
+<script>
+  function loadChildCategories(level) {
+    var selectedCategoryId = document.getElementById('category_id_' + level).value;
+    // Remove any child selectors
+    var container = document.getElementById('category-selectors');
+    while (container.children.length > level + 1) {
+      container.removeChild(container.lastChild);
+    }
+
+    if (selectedCategoryId) {
+      fetch("{{ url_for('categories.get_children', parent_id='') }}" + selectedCategoryId)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            // Create new select element
+            var select = document.createElement('select');
+            select.name = 'category_id';
+            select.id = 'category_id_' + (level + 1);
+            select.className = 'form-control mt-2';
+            select.required = true;
+            select.onchange = function() { loadChildCategories(level + 1); };
+
+            // Add default option
+            var defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Select Subcategory';
+            select.appendChild(defaultOption);
+
+            // Populate with child categories
+            data.forEach(function(category) {
+              var option = document.createElement('option');
+              option.value = category.category_id;
+              option.text = category.category_name;
+              select.appendChild(option);
+            });
+
+            container.appendChild(select);
+          } else {
+            // No more child categories; set the selected category ID
+          }
+        });
+    }
+  }
+</script>
 
 {% endblock %}

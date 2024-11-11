@@ -1,16 +1,35 @@
 {% extends "base.html" %} {% block content %}
-
 <br /><br />
-
 <!-- templates/base.html (or the relevant header template) -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="{{ url_for('index.index') }}">Welcome to Pokezon</a>
-  <!-- Rest of the navigation items -->
-</nav>
-
 <h1>Products for sale:</h1>
-
 <div class="container">
+  <!-- Add this form at the top -->
+  <form method="GET" action="{{ url_for('index.index') }}" class="form-inline my-2">
+    <input
+      class="form-control mr-sm-2"
+      type="search"
+      id="search_query"
+      name="search_query"
+      placeholder="Search products"
+      value="{{ request.args.get('search_query', '') }}"
+    />
+    <!-- Category selectors container -->
+    <div id="category-selectors">
+      <!-- Initial parent category selector here -->
+    </div>
+    <button class="btn btn-outline-success" type="submit">Search</button>
+    <!-- Add this in the appropriate place within your form -->
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button">
+        Categories
+      </button>
+      <ul class="dropdown-menu">
+        {% for category in categories.values() %}
+          {% include 'category_dropdown_item.html' %}
+        {% endfor %}
+      </ul>
+    </div>
+  </form>
   <!-- Filter Input Box for Price -->
   <div class="row mb-4">
     <div class="col-md-6 offset-md-3">
@@ -41,6 +60,8 @@
       </div>
     </div>
   </div>
+
+
 
   <h2>Products:</h2>
 
@@ -117,7 +138,109 @@
       }
     });
   }
+
+  $(function() {
+    $("#search_query").autocomplete({
+      source: function(request, response) {
+        $.ajax({
+          url: "{{ url_for('products.autocomplete') }}",
+          dataType: "json",
+          data: {
+            q: request.term
+          },
+          success: function(data) {
+            response(data.matching_results);
+          }
+        });
+      },
+      minLength: 2,
+    });
+  });
+
+  function loadSubcategories(level) {
+    var selectedCategoryId = document.getElementById('category_id_' + level).value;
+    // Remove any child selectors
+    var container = document.getElementById('category-selectors');
+    while (container.children.length > level + 1) {
+      container.removeChild(container.lastChild);
+    }
+
+    if (selectedCategoryId) {
+      fetch("{{ url_for('categories.get_children') }}?parent_id=" + selectedCategoryId)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            // Create new select element
+            var select = document.createElement('select');
+            select.name = 'category_id';
+            select.id = 'category_id_' + (level + 1);
+            select.className = 'form-control mr-sm-2 mt-2';
+            select.onchange = function() { loadSubcategories(level + 1); };
+
+            // Add default option
+            var defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Select Subcategory';
+            select.appendChild(defaultOption);
+
+            // Populate with child categories
+            data.forEach(function(category) {
+              var option = document.createElement('option');
+              option.value = category.category_id;
+              option.text = category.category_name;
+              select.appendChild(option);
+            });
+
+            container.appendChild(select);
+          }
+        });
+    }
+  }
 </script>
+
+<!-- Include jQuery library in your base template or index.html -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include jQuery UI library for autocomplete -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
+<style>
+/* Dropdown Styles */
+.dropdown-menu {
+  position: absolute;
+  display: none;
+  top: 100%;
+  left: 0;
+}
+
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+}
+
+.dropdown:hover > .dropdown-menu,
+.dropdown-submenu:hover > .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 1.5rem;
+  text-decoration: none;
+  color: #212529;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #16181b;
+}
+</style>
 
 <br /><br />
 

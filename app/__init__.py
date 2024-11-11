@@ -38,8 +38,7 @@ def create_app():
     from .inventory import bp as seller_bp
     app.register_blueprint(seller_bp)
 
-    # Uncomment and register additional blueprints as needed
-    # from .purchase import bp as purchase_bp
-    # app.register_blueprint(purchase_bp)
+    from .category import bp as categories_bp
+    app.register_blueprint(categories_bp)
 
     return app

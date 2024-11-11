@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import current_user, login_required
 from app.models.product import Product
 from app.models.inventory import Inventory
@@ -6,6 +6,7 @@ from app.models.seller_products import SellerProduct  # Assuming you have this m
 from datetime import datetime
 from app.models.reviews import Reviews
 from app.models.user import User  # Import the User model
+from app.models.category import Category  # Import the Category model
 
 bp = Blueprint('products', __name__, url_prefix='/products')
 
@@ -61,8 +62,9 @@ def create_product():
             flash('An error occurred while creating the product.')
             return redirect(url_for('products.create_product'))
     else:
-        # Render the product creation form
-        return render_template('create_product.html')
+        # For GET request, fetch categories
+        categories = Category.get_all()
+        return render_template('create_product.html', categories=categories)
 
 @bp.route('/<int:product_id>')
 def product_page(product_id):
@@ -70,6 +72,9 @@ def product_page(product_id):
     if not product:
         flash('Product not found.', 'danger')
         return redirect(url_for('index.index'))
+
+    # Get category information
+    category = Category.get(product.category_id)
 
     # Get sellers with inventory for the product
     inventory = Inventory.get_by_product(product_id)
@@ -98,5 +103,26 @@ def product_page(product_id):
         product=product,
         reviews=reviews,
         average_rating=average_rating,
-        sellers=sellers
+        sellers=sellers,
+        category=category
     )
+
+@bp.route('/autocomplete')
+def autocomplete():
+    search = request.args.get('q', '')
+    product_names = Product.get_product_names(search)
+    return jsonify(matching_results=product_names)
+
+# FILE: app/models/product.py
+
+@staticmethod
+def search_by_name(search_query):
+    rows = app.db.execute(
+        '''
+        SELECT product_id, seller_id, category_id, name, summary, image_url, price, created_at, updated_at, available
+        FROM Products
+        WHERE LOWER(name) LIKE LOWER(:search_query)
+        ''',
+        search_query=f'%{search_query}%'
+    )
+    return [Product(*row) for row in rows]

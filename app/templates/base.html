@@ -160,7 +160,11 @@
   <body>
     <div class="sidenav">
       {% block msg %}
-      <h1 class="pokemon-header">Welcome to PokéZon!</h1>
+      <h1 class="pokemon-header">
+        <a href="{{ url_for('index.index') }}" style="text-decoration: none; color: inherit;">
+          Welcome to PokéZon!
+        </a>
+      </h1>
       <div style="color: black; text-align: right; margin-bottom: 25px">
         {% if current_user.is_authenticated %}
         <!-- Added Cart Button -->

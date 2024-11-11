@@ -1,0 +1,18 @@
+<!-- FILE: app/templates/category_dropdown_item.html -->
+
+<li class="dropdown-submenu">
+  <a class="dropdown-item" href="{{ url_for('index.index') }}?category_id={{ category.category_id }}">
+    {{ category.category_name }}
+    {% if category.children %}
+      &raquo;
+    {% endif %}
+  </a>
+  {% if category.children %}
+  <ul class="dropdown-menu">
+    {% for child in category.children %}
+      {% set category = child %}
+      {% include 'category_dropdown_item.html' %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+</li>

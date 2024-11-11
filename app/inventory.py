@@ -1,6 +1,6 @@
 # app/inventory.py
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import current_user, login_required
 from app.models.inventory import Inventory
 from app.models.product import Product
@@ -45,11 +45,14 @@ def inventory():
 @login_required
 def create_product():
     if request.method == 'POST':
+        # Retrieve the last selected category_id
+        category_ids = request.form.getlist('category_id')
+        category_id = category_ids[-1] if category_ids else None
+        # Existing code to handle product creation
         # Retrieve form data
         name = request.form.get('name')
         summary = request.form.get('summary')
         price = request.form.get('price')
-        category_id = request.form.get('category_id')
         image_url = request.form.get('image_url')
         quantity = request.form.get('quantity')
 
@@ -87,15 +90,18 @@ def create_product():
                 quantity=quantity
             )
 
-            flash('Product listed successfully!', 'success')
-            return redirect(url_for('profile.profile'))
+            flash('Product created successfully!', 'success')
+            return redirect(url_for('seller.inventory'))
         else:
-            flash('An error occurred while listing the product.', 'danger')
+            flash('An error occurred while creating the product.', 'danger')
             return redirect(url_for('seller.create_product'))
     else:
+        # Existing code for GET request
         # For GET request, fetch categories to populate dropdown
         categories = Category.get_all()
-        return render_template('create_product.html', title='List a New Product', categories=categories)
+        # Retrieve form data from session if available
+        form_data = session.pop('create_product_form_data', {})
+        return render_template('create_product.html', title='List a New Product', categories=categories, form_data=form_data)
 
 # app/models/inventory.py
 @staticmethod

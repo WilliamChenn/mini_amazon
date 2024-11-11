@@ -10,17 +10,57 @@ class Category:
     @staticmethod
     def get(category_id):
         rows = app.db.execute('''
-SELECT category_id, category_name, parent_id
-FROM Categories
-WHERE category_id = :category_id
-''',
+            SELECT category_id, category_name, parent_id
+            FROM Categories
+            WHERE category_id = :category_id
+        ''',
                               category_id=category_id)
         return Category(*rows[0]) if rows else None
 
     @staticmethod
     def get_all():
         rows = app.db.execute('''
-SELECT category_id, category_name, parent_id
-FROM Categories
-''')
+            SELECT category_id, category_name, parent_id
+            FROM Categories
+        ''')
         return [Category(*row) for row in rows]
+
+    @staticmethod
+    def create(category_name, parent_id=None):
+        try:
+            rows = app.db.execute('''
+                INSERT INTO Categories (category_name, parent_id)
+                VALUES (:category_name, :parent_id)
+                RETURNING category_id, category_name, parent_id
+            ''',
+                                  category_name=category_name,
+                                  parent_id=parent_id)
+            return Category(*rows[0]) if rows else None
+        except Exception as e:
+            app.logger.error(f"Error creating category: {e}")
+            return None
+
+    @staticmethod
+    def get_children(parent_id):
+        rows = app.db.execute('''
+            SELECT category_id, category_name, parent_id
+            FROM Categories
+            WHERE parent_id = :parent_id
+        ''', parent_id=parent_id)
+        return [Category(*row) for row in rows]
+
+    @staticmethod
+    def get_all_subcategory_ids(category_id):
+        # Fetch all categories
+        categories = Category.get_all()
+        categories_dict = {c.category_id: c for c in categories}
+        subcategory_ids = []
+
+        def recurse(current_id):
+            subcategory_ids.append(current_id)
+            for cat in categories:
+                if cat.parent_id == current_id:
+                    recurse(cat.category_id)
+
+        recurse(category_id)
+        return subcategory_ids

@@ -27,6 +27,10 @@
             {% endif %}
             <p><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</p>
             <p>{{ product.summary }}</p>
+            <!-- Display category name -->
+            <p>
+              <strong>Category:</strong> {{ category.category_name }}
+            </p>
             <!-- Add to Cart Form -->
             <!-- templates/product.html -->
             {% if sellers %}
