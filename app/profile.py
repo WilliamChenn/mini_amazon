@@ -1,3 +1,4 @@
+import math
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 import datetime
@@ -16,17 +17,26 @@ bp = Blueprint('profile', __name__)
 @bp.route('/profile', methods=['GET'])
 def profile():
     if current_user.is_authenticated:
-        # Get recent reviews
-        reviews = Reviews.get_top_by_user_id(current_user.id)
-        
-        # Get the user's orders
-        orders = Order.get_by_user(current_user.id)
-        
+        # Get page number from request args
+        page = request.args.get('page', 1, type=int)
+        per_page = 4  # Show 4 orders per page
+
+        # Get all orders for the user
+        all_orders = Order.get_by_user(current_user.id)
+
+        # Compute total pages
+        total_orders = len(all_orders)
+        total_pages = math.ceil(total_orders / per_page)
+
+        # Slice orders for current page
+        start = (page - 1) * per_page
+        end = start + per_page
+        orders = all_orders[start:end]
+
         # For each order, get the associated order items and product details
         orders_with_items = []
         for order in orders:
             order_items = OrderItem.get_by_order(order.order_id)
-            # For each order item, get product details
             items_with_details = []
             for item in order_items:
                 product = Product.get(item.product_id)
@@ -38,11 +48,21 @@ def profile():
                 'order': order,
                 'items': items_with_details
             })
+        # Get recent reviews
+        reviews = Reviews.get_top_by_user_id(current_user.id)
     else:
         reviews = None
         orders_with_items = None
+        page = None
+        total_pages = None
 
-    return render_template('profile.html', reviews=reviews, orders_with_items=orders_with_items)
+    return render_template(
+        'profile.html',
+        reviews=reviews,
+        orders_with_items=orders_with_items,
+        page=page,
+        total_pages=total_pages
+    )
 
 
 @bp.route('/profile/update', methods=['GET', 'POST'])
@@ -127,4 +147,3 @@ def add_review():
         return jsonify({'message': 'Review added successfully.'}), 201
     else:
         return jsonify({'error': 'Failed to add review.'}), 500
-    

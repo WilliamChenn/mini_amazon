@@ -29,7 +29,7 @@ def index():
         category.children = []  # Initialize children list
 
     for category in categories_list:
-        if category.parent_id:
+        if category.parent_id is not None:
             parent = categories_dict.get(category.parent_id)
             if parent:
                 parent.children.append(category)
