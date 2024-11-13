@@ -27,3 +27,17 @@ Back end:
 
 Link to short video demo:
 https://drive.google.com/file/d/1DgyEpF8W8QaoExLHqn26lzhSmPfWX3hA/view?usp=drive_link
+
+## Progress Summary Since Milestone 3:
+
+Front-End:
+= Each page's load time was optimized by compressing images and enabling caching for frequently accessed components. 
+- Enhanced navigation tools, such as a sidebar for product filters, were implemented to improve usability.
+- Logged-in users now see a personalized recommendations section.
+
+Back-End:
+- A new search indexing service was integrated to improve search speed and accuracy.
+- Enhanced error handling and logging were added to the checkout and payment processes to ensure smoother, more reliable transactions.
+
+Link to short video demo:
+https://drive.google.com/drive/folders/10dkpG4RA1bvF4scwr8mjEoF4dM2I1aGY?usp=drive_link
