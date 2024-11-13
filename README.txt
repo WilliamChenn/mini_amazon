@@ -31,13 +31,16 @@ https://drive.google.com/file/d/1DgyEpF8W8QaoExLHqn26lzhSmPfWX3hA/view?usp=drive
 ## Progress Summary Since Milestone 3:
 
 Front-End:
-= Each page's load time was optimized by compressing images and enabling caching for frequently accessed components. 
-- Enhanced navigation tools, such as a sidebar for product filters, were implemented to improve usability.
-- Logged-in users now see a personalized recommendations section.
+- Added a dynamic search bar and category filters on the homepage and improved the product listing view with pagination controls so users can efficiently browse larger sets of products.
+- Integrated a review section under each product, allowing users to leave text reviews and star ratings.
+- Displayed an average rating calculation on the product page based on submitted reviews.
+
 
 Back-End:
-- A new search indexing service was integrated to improve search speed and accuracy.
-- Enhanced error handling and logging were added to the checkout and payment processes to ensure smoother, more reliable transactions.
+- Created RESTful APIs to handle requests for user profile updates, product search, category management, cart operations, and reviews. 
+- Integrated error handling mechanisms to return meaningful error messages for cases like duplicate emails or insufficient stock.
+- Implemented pagination in API responses to handle large product datasets efficiently, only loading a subset of products per page.
+- Implemented a review aggregation service to compute average ratings for products based on submitted reviews and included stock verification logic within the cart API, so users cannot add more items to the cart that are available in stock.
 
 Link to short video demo:
 https://drive.google.com/drive/folders/10dkpG4RA1bvF4scwr8mjEoF4dM2I1aGY?usp=drive_link
