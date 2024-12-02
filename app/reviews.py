@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
+from sqlalchemy import delete
 
 from app.models.product import Product
 from app.models.reviews import Reviews
@@ -58,3 +59,31 @@ def edit_review(review_id, product_id):
     review = Reviews.get_by_id(review_id)
     product = Product.get(product_id)
     return render_template('edit_review.html', form_data={}, review=review, product=product)
+
+@bp.route('/delete-review/<int:review_id>/<int:product_id>', methods=['GET'])
+def delete_review(review_id, product_id):
+    
+    review = Reviews.delete_review(review_id)
+    flash('Review deleted successfully!', 'success')
+    return redirect(url_for('products.product_page', product_id=product_id))
+
+@bp.route('/view-reviews/', methods=['GET'])
+def view_reviews():
+    
+    seller_reviews = Reviews.get_seller_reviews()
+    product_reviews = Reviews.get_product_reviews()
+    
+    # Combine the results and add a "type" field for distinction
+    all_reviews = [
+        {**review, 'type': 'seller'} for review in seller_reviews
+    ] + [
+        {**review, 'type': 'product'} for review in product_reviews
+    ]
+
+    # Sort the combined reviews by rating (descending), then date (descending)
+    sorted_reviews = sorted(
+        all_reviews,
+        key=lambda x: (-x['average_rating'], x['latest_review_date'])
+    )
+    
+    return render_template('view_reviews.html', reviews=sorted_reviews)
