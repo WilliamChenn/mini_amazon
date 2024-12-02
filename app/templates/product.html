@@ -1,94 +1,156 @@
 <!-- templates/product.html -->
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        <!-- Product Image -->
-        <div class="col-md-6">
-            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid">
-        </div>
-        <!-- Product Details -->
-        <div class="col-md-6">
-            <h2>{{ product.name }}</h2>
-            <!-- Average Rating -->
-            {% if average_rating %}
-            <p>
-                Rating:
-                {% for i in range((average_rating|round(0, 'floor'))|int) %}
-                <span class="fa fa-star checked"></span>
-                {% endfor %}
-                {% for i in range(5 - (average_rating|round(0, 'floor')|int)) %}
-                <span class="fa fa-star"></span>
-                {% endfor %}
-                ({{ average_rating|round(1) }} out of 5)
-            </p>
-            {% else %}
-            <p>No reviews yet.</p>
-            {% endif %}
-            <p><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</p>
-            <p>{{ product.summary }}</p>
-            <!-- Display category name -->
-            <p>
-              <strong>Category:</strong> {{ category.category_name }}
-            </p>
-            <!-- Add to Cart Form -->
-            <!-- templates/product.html -->
-            {% if sellers %}
-            <form action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}" method="POST">
-              <div class="form-group">
-                <label for="seller_id">Choose a Seller:</label>
-                <select name="seller_id" id="seller_id" class="form-control w-50">
-                  {% for item in sellers %}
-                  <option value="{{ item.seller.user_id }}">
-                    {{ item.seller.first_name }} {{ item.seller.last_name }} - Quantity Available: {{ item.quantity }}
-                  </option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="quantity">Quantity:</label>
-                <input type="number" name="quantity" value="1" min="1" max="{{ sellers[0].quantity }}" class="form-control w-25">
-              </div>
-              <button type="submit" class="btn btn-primary mt-3">Add to Cart</button>
-            </form>
-            {% else %}
-            <p class="text-danger">Currently unavailable.</p>
-            {% endif %}
-        </div>
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div
+    class="alert alert-{{ category }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+  <div class="row">
+    <!-- Product Image -->
+    <div class="col-md-6">
+      <img
+        src="{{ product.image_url }}"
+        alt="{{ product.name }}"
+        class="img-fluid"
+      />
     </div>
-    <!-- Reviews Section -->
-    <div class="mt-5">
-        <h3>Customer Reviews</h3>
-        {% if reviews %}
-        {% for review in reviews %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <p>
-                    {% for i in range(review.rating|int) %}
-                    <span class="fa fa-star checked"></span>
-                    {% endfor %}
-                    {% for i in range(5 - (review.rating|int)) %}
-                    <span class="fa fa-star"></span>
-                    {% endfor %}
-                </p>
-                <p>{{ review.comment }}</p>
-                <p class="text-muted">
-                    By {{ review.reviewer.first_name }} {{ review.reviewer.last_name }} on
-                    {{ review.created_at.strftime('%Y-%m-%d') }}
-                </p>
-            </div>
+    <!-- Product Details -->
+    <div class="col-md-6">
+      <h2>{{ product.name }}</h2>
+      <!-- Average Rating -->
+      {% if average_rating %}
+      <p>
+        Rating: {% for i in range((average_rating|round(0, 'floor'))|int) %}
+        <span class="fa fa-star checked"></span>
+        {% endfor %} {% for i in range(5 - (average_rating|round(0,
+        'floor')|int)) %}
+        <span class="fa fa-star"></span>
+        {% endfor %} ({{ average_rating|round(1) }} out of 5)
+      </p>
+      {% else %}
+      <p>No reviews yet.</p>
+      {% endif %}
+      <p><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</p>
+      <p>{{ product.summary }}</p>
+      <!-- Display category name -->
+      <p><strong>Category:</strong> {{ category.category_name }}</p>
+      <!-- Add to Cart Form -->
+      {% if sellers %}
+      <form
+        action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}"
+        method="POST"
+      >
+        <div class="form-group">
+          <label for="seller_id">Choose a Seller:</label>
+          <select name="seller_id" id="seller_id" class="form-control w-50">
+            {% for item in sellers %}
+            <option value="{{ item.seller.user_id }}">
+              {{ item.seller.first_name }} {{ item.seller.last_name }} -
+              Quantity Available: {{ item.quantity }}
+            </option>
+            {% endfor %}
+          </select>
         </div>
-        {% endfor %}
-        {% else %}
-        <p>No reviews yet.</p>
+        <div class="form-group">
+          <label for="quantity">Quantity:</label>
+          <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            max="{{ sellers[0].quantity }}"
+            class="form-control w-25"
+          />
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+            <a
+              id="add-review-link"
+              href="{{ url_for('reviews.add_review', product_id=product.product_id, seller_id=sellers[0].seller.user_id) }}"
+              class="btn btn-primary"
+            >
+              Add Review
+            </a>
+          </div>
+        </div>
+      </form>
+      {% else %}
+      <p class="text-danger">Currently unavailable.</p>
+      {% endif %}
+    </div>
+  </div>
+  <!-- Reviews Section -->
+  <div class="mt-5">
+    <h3>Customer Reviews</h3>
+
+    {% if reviews %} {% for review in reviews %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <p>
+          {% for i in range(review.rating|int) %}
+          <span class="fa fa-star checked"></span>
+          {% endfor %} {% for i in range(5 - (review.rating|int)) %}
+          <span class="fa fa-star"></span>
+          {% endfor %}
+        </p>
+        <p>{{ review.comment }}</p>
+        <p class="text-muted">
+          By {{ review.reviewer.first_name }} {{ review.reviewer.last_name }} on
+          {{ review.created_at.strftime('%Y-%m-%d') }}
+        </p>
+
+        {% if review.reviewer_id == current_user.id %}
+        <!-- Show "Edit Review" button only for the current user's review -->
+        <div class="row mt-3">
+          <div class="col-auto">
+            <a
+              class="btn btn-primary btn-sm"
+              href="{{ url_for('reviews.edit_review', review_id=review.review_id, product_id=product.product_id) }}"
+            >
+              Edit Review
+            </a>
+          </div>
+        </div>
         {% endif %}
+      </div>
     </div>
+    {% endfor %} {% else %}
+    <p>No reviews yet for this product.</p>
+    {% endif %}
+  </div>
 </div>
 <!-- Include Font Awesome for star icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"
+/>
 <style>
-    .checked {
-        color: orange;
-    }
+  .checked {
+    color: orange;
+  }
 </style>
+<script>
+  // Get references to the dropdown and the "Add Review" link
+  const sellerDropdown = document.getElementById("seller_id");
+  const addReviewLink = document.getElementById("add-review-link");
+
+  // Update the href of the "Add Review" link when the dropdown changes
+  sellerDropdown.addEventListener("change", function () {
+    const selectedSellerId = this.value; // Get the selected seller ID
+    const productId = "{{ product.product_id }}"; // Safely inject product_id
+    addReviewLink.href = `/add-review/${productId}/${selectedSellerId}`;
+  });
+</script>
 {% endblock %}

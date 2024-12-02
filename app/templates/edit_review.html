@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container mt-5">
+  <h1 class="text-center">Edit Review for {{ product.product_name }}</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div
+    class="alert alert-{{ category }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <!-- Edit Review Form -->
+  <form
+    method="POST"
+    action="{{ url_for('reviews.edit_review', review_id=review.review_id, product_id = product.product_id) }}"
+  >
+    <!-- Rating Selection -->
+    <div class="form-group">
+      <label for="rating">Rating (1-5)*</label>
+      <select name="rating" id="rating" class="form-control" required>
+        {% for i in range(1, 6) %}
+        <option value="{{ i }}" {% if i == review.rating %}selected{% endif %} >{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Comment Field -->
+    <div class="form-group">
+      <label for="comment">Comment*</label>
+      <textarea
+        name="comment"
+        id="comment"
+        class="form-control"
+        rows="4"
+        required
+      >
+{{ review.comment }}</textarea
+      >
+    </div>
+
+    <!-- Submit and Delete Buttons -->
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a
+        class="btn btn-danger"
+        onclick="return confirm('Are you sure you want to delete this review?');"
+      >
+        Delete Review
+      </a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

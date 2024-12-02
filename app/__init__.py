@@ -40,5 +40,8 @@ def create_app():
 
     from .category import bp as categories_bp
     app.register_blueprint(categories_bp)
+    
+    from .reviews import bp as reviews_bp
+    app.register_blueprint(reviews_bp)
 
     return app

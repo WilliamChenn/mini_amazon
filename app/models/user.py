@@ -37,7 +37,7 @@ WHERE account_number = :account_number
 """,
                               account_number=account_number)
         return len(rows) > 0
-
+    
     @staticmethod
     def email_exists(email):
         rows = app.db.execute("""
