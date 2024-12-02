@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
+from sqlalchemy import delete
 
 from app.models.product import Product
 from app.models.reviews import Reviews
@@ -58,3 +59,10 @@ def edit_review(review_id, product_id):
     review = Reviews.get_by_id(review_id)
     product = Product.get(product_id)
     return render_template('edit_review.html', form_data={}, review=review, product=product)
+
+@bp.route('/delete-review/<int:review_id>/<int:product_id>', methods=['GET'])
+def delete_review(review_id, product_id):
+    
+    review = Reviews.delete_review(review_id)
+    flash('Review deleted successfully!', 'success')
+    return redirect(url_for('products.product_page', product_id=product_id))

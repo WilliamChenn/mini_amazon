@@ -73,5 +73,14 @@ class Reviews:
             rating=rating,
             comment=comment)
         return True
+    
+    @staticmethod
+    def delete_review(review_id):
+        app.db.execute('''
+                DELETE FROM Reviews
+                WHERE review_id = :review_id
+            ''',
+            review_id=review_id)
+        return True
 
 
