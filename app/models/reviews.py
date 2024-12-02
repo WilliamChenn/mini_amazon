@@ -82,5 +82,35 @@ class Reviews:
             ''',
             review_id=review_id)
         return True
+    
+    @staticmethod
+    def get_seller_reviews():
+        rows = app.db.execute('''
+            SELECT u.first_name, AVG(r.rating) AS average_rating, MAX(r.created_at) AS latest_review_date, COUNT(r.rating) AS rating_count
+            FROM Reviews r
+            JOIN Users u ON r.seller_id = u.user_id
+            GROUP BY r.seller_id, u.first_name
+            ORDER BY average_rating DESC, latest_review_date DESC
+        ''')
+        return [
+            {'id': row[0], 'average_rating': row[1], 'latest_review_date': row[2], 'review_count': row[3]}
+            for row in rows
+        ]
+
+    @staticmethod
+    def get_product_reviews():
+        rows = app.db.execute('''
+            SELECT p.name, AVG(r.rating) AS average_rating, MAX(r.created_at) AS latest_review_date, COUNT(r.rating) AS rating_count
+            FROM Reviews r
+            JOIN Products p ON r.product_id = p.product_id
+            GROUP BY p.product_id, p.name
+            ORDER BY average_rating DESC, latest_review_date DESC
+        ''')
+        return [
+            {'id': row[0], 'average_rating': row[1], 'latest_review_date': row[2], 'review_count': row[3]}
+            for row in rows
+        ]
+
+
 
 

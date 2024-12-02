@@ -1,0 +1,34 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">All Reviews</h1>
+
+  {% if reviews %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Average Rating</th>
+          <th>Number of Reviews</th>
+          <th>Latest Review Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for review in reviews %}
+        <tr>
+          <td>{{ review.type }}</td>
+          <td>{{ review.id }}</td>
+          <td>{{ review.average_rating|round(1) }}</td>
+          <td>{{ review.review_count }}</td>
+          <td>{{ review.latest_review_date.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center">No reviews available.</p>
+  {% endif %}
+</div>
+{% endblock %}

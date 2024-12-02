@@ -66,3 +66,24 @@ def delete_review(review_id, product_id):
     review = Reviews.delete_review(review_id)
     flash('Review deleted successfully!', 'success')
     return redirect(url_for('products.product_page', product_id=product_id))
+
+@bp.route('/view-reviews/', methods=['GET'])
+def view_reviews():
+    
+    seller_reviews = Reviews.get_seller_reviews()
+    product_reviews = Reviews.get_product_reviews()
+    
+    # Combine the results and add a "type" field for distinction
+    all_reviews = [
+        {**review, 'type': 'seller'} for review in seller_reviews
+    ] + [
+        {**review, 'type': 'product'} for review in product_reviews
+    ]
+
+    # Sort the combined reviews by rating (descending), then date (descending)
+    sorted_reviews = sorted(
+        all_reviews,
+        key=lambda x: (-x['average_rating'], x['latest_review_date'])
+    )
+    
+    return render_template('view_reviews.html', reviews=sorted_reviews)
