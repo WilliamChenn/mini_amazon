@@ -39,16 +39,27 @@ class Reviews:
         return [Reviews(*row) for row in rows]
     
     @staticmethod
-    def get_top_by_user_id(reviewer_id):
+    def get_reviews_by_user_id(reviewer_id):
         rows = app.db.execute('''
-            SELECT review_id, p.seller_id, reviewer_id, name, rating, comment, r.created_at, r.updated_at
+            SELECT review_id, p.seller_id, p.product_id, reviewer_id, name, rating, comment, r.created_at, r.updated_at
             FROM Reviews r, Products p
             WHERE reviewer_id = :reviewer_id
             AND r.product_id = p.product_id
             ORDER BY r.created_at
-            LIMIT 5
             ''', reviewer_id=reviewer_id)
-        return [Reviews(*row) for row in rows]
+        return [
+            {'review_id': row[0], 
+             'seller_id': row[1], 
+            'product_id': row[2], 
+            'reviewer_id': row[3],
+            'name': row[4],
+            'rating': row[5],
+            'comment': row[6],
+            'created_at': row[7],
+            'updated_at': row[8],
+            }
+            for row in rows
+        ]
     
     @staticmethod
     def review_user_id_exists(user_id, product_id):
