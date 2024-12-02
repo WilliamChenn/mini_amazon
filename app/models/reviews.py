@@ -67,7 +67,7 @@ class Reviews:
             SELECT review_id
             FROM Reviews r
             WHERE r.reviewer_id = :reviewer_id
-            AND r.product_id = product_id
+            AND r.product_id = :product_id
             ''', reviewer_id=user_id, product_id = product_id)
         return len(rows) > 0
     
@@ -84,6 +84,20 @@ class Reviews:
             rating=rating,
             comment=comment)
         return True
+    
+    @staticmethod
+    def create_review(seller_id, reviewer_id, product_id, rating, comment):
+        app.db.execute('''
+            INSERT INTO Reviews (seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at)
+            VALUES (:seller_id, :reviewer_id, :product_id, :rating, :comment, NOW(), NOW())
+        ''',
+        seller_id=seller_id,
+        reviewer_id=reviewer_id,
+        product_id=product_id,
+        rating=rating,
+        comment=comment)
+        return True
+
     
     @staticmethod
     def delete_review(review_id):
