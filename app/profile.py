@@ -49,7 +49,7 @@ def profile():
                 'items': items_with_details
             })
         # Get recent reviews
-        reviews = Reviews.get_top_by_user_id(current_user.id)
+        reviews = Reviews.get_reviews_by_user_id(current_user.id)
     else:
         reviews = None
         orders_with_items = None
