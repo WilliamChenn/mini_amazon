@@ -1,4 +1,4 @@
-from flask import current_app as app
+from flask import current_app as app, render_template
 from flask_login import current_user
 
 class Reviews:
@@ -12,6 +12,14 @@ class Reviews:
         self.created_at = created_at
         self.updated_at = updated_at
 
+    @staticmethod
+    def get_by_id(review_id):
+        rows = app.db.execute('''
+            SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at
+            FROM Reviews
+            WHERE review_id = :review_id
+            ''', review_id=review_id)
+        return Reviews(*(rows[0])) if rows else None
     @staticmethod
     def get_by_product(product_id):
         rows = app.db.execute('''
@@ -43,18 +51,27 @@ class Reviews:
         return [Reviews(*row) for row in rows]
     
     @staticmethod
-    def create_review(seller_id, reviewer_id, product_id, rating, comment):
-        try:
-            app.db.execute('''
-                    INSERT INTO Reviews (seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at)
-                    VALUES (:seller_id, :reviewer_id, :product_id, :rating, :comment, NOW(), NOW())
-                ''',
-                seller_id=seller_id,
-                reviewer_id=reviewer_id,
-                product_id=product_id,
-                rating=rating,
-                comment=comment)
-            return True
-        except Exception as e:
-            print(f"Error creating review: {e}")
-            return False
+    def review_user_id_exists(user_id, product_id):
+        rows = app.db.execute('''
+            SELECT review_id
+            FROM Reviews r
+            WHERE r.reviewer_id = :reviewer_id
+            AND r.product_id = product_id
+            ''', reviewer_id=user_id, product_id = product_id)
+        return len(rows) > 0
+    
+    @staticmethod
+    def update_review(review_id, rating, comment):
+        app.db.execute('''
+                UPDATE Reviews
+                SET rating = :rating,
+                    comment = :comment,
+                    updated_at = NOW()
+                WHERE review_id = :review_id
+            ''',
+            review_id=review_id,
+            rating=rating,
+            comment=comment)
+        return True
+
+

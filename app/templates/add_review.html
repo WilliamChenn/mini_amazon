@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container mt-5">
+  <h1 class="text-center">Add a Review for {{ product_name }}</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %} {% for category, message in messages %}
+  <div
+    class="alert alert-{{ category }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <form
+    method="POST"
+    action="{{ url_for('reviews.add_review', product_id=product_id, seller_id=seller_id) }}"
+  >
+    <!-- Rating Selection -->
+    <div class="form-group">
+      <label for="rating">Rating (1-5)*</label>
+      <select name="rating" id="rating" class="form-control" required>
+        <option value="">Select a Rating</option>
+        {% for i in range(1, 6) %}
+        <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Comment Field -->
+    <div class="form-group">
+      <label for="comment">Comment*</label>
+      <textarea
+        name="comment"
+        id="comment"
+        class="form-control"
+        rows="4"
+        required
+      >
+{{ form_data.get('comment', '') }}</textarea
+      >
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary">Submit Review</button>
+  </form>
+</div>
+
+{% endblock %}
