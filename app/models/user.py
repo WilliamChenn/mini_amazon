@@ -157,12 +157,12 @@ WHERE user_id = :user_id
     def update_balance(self, new_balance):
         try:
             app.db.execute("""
-UPDATE Users
-SET balance = :new_balance
-WHERE user_id = :user_id
-""",
-                        new_balance=new_balance,
-                        user_id=self.user_id)
+                UPDATE Users
+                SET balance = :new_balance
+                WHERE user_id = :user_id
+            """,
+            new_balance=new_balance,
+            user_id=self.user_id)
             self.balance = new_balance
             return True
         except Exception as e:

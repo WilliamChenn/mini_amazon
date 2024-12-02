@@ -2,7 +2,7 @@ import math
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 import datetime
-
+from decimal import Decimal
 from app.models.user import User
 
 from .models.product import Product
@@ -75,21 +75,25 @@ def update_profile():
         email = request.form.get('email')
         address = request.form.get('address')
         summary = request.form.get('summary')
-        balance = request.form.get('balance')
         password = request.form.get('password')
+
+        # Get balance action and amount
+        balance_action = request.form.get('balance_action')
+        balance_amount = request.form.get('balance_amount')
 
         # Validate and update email
         if email != current_user.email and User.email_exists(email):
             flash('Email already in use.', 'danger')
-            # Render the template with existing form data
-            return render_template('update_profile.html', 
-                                   first_name=first_name,
-                                   last_name=last_name,
-                                   email=email,
-                                   address=address,
-                                   summary=summary,
-                                   balance=balance)
-        
+            return render_template(
+                'update_profile.html',
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                address=address,
+                summary=summary,
+                balance=current_user.balance  # Pass current balance
+            )
+
         # Update email if changed
         if email != current_user.email:
             current_user.change_email(email)
@@ -99,7 +103,30 @@ def update_profile():
         current_user.update_last_name(last_name)
         current_user.update_address(address)
         current_user.update_summary(summary)
-        current_user.update_balance(balance)
+
+        # Handle balance update
+        if balance_action and balance_amount:
+            try:
+                amount = Decimal(balance_amount)  # Convert amount to Decimal
+                if amount <= 0:
+                    raise ValueError("Amount must be positive.")
+
+                if balance_action == 'add':
+                    new_balance = current_user.balance + amount
+                elif balance_action == 'withdraw':
+                    if amount > current_user.balance:
+                        flash('You cannot withdraw more than your current balance.', 'danger')
+                        return redirect(url_for('profile.update_profile'))
+                    new_balance = current_user.balance - amount
+                else:
+                    flash('Invalid balance action.', 'danger')
+                    return redirect(url_for('profile.update_profile'))
+
+                # Update balance
+                current_user.update_balance(new_balance)
+            except ValueError as e:
+                flash(str(e), 'danger')
+                return redirect(url_for('profile.update_profile'))
 
         # Update password if provided
         if password:
@@ -108,13 +135,15 @@ def update_profile():
         flash('Profile updated successfully.', 'success')
         return redirect(url_for('profile.profile'))
     else:
-        return render_template('update_profile.html',
-                               first_name=current_user.first_name,
-                               last_name=current_user.last_name,
-                               email=current_user.email,
-                               address=current_user.address,
-                               summary=current_user.summary,
-                               balance=current_user.balance)
+        return render_template(
+            'update_profile.html',
+            first_name=current_user.first_name,
+            last_name=current_user.last_name,
+            email=current_user.email,
+            address=current_user.address,
+            summary=current_user.summary,
+            balance=current_user.balance  # Pass current balance
+        )
 
 
 @bp.route('/add-review', methods=['POST'])
