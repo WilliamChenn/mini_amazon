@@ -1,6 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import delete
+from app.models.orders import Order
 
 from app.models.product import Product
 from app.models.reviews import Reviews
@@ -22,11 +23,15 @@ def add_review(product_id, seller_id):
             flash('All fields are required.', 'danger')
             return redirect(url_for('review.add_review', product_id=product_id))
 
-        # Check if user has already reviewed the product
+        # Check if user has already reviewed the product or user has not purchased product
         if(Reviews.review_user_id_exists(current_user.id, product_id)):
             flash('You have already reviewed this product!', 'danger')
             return redirect(url_for('products.product_page', product_id=product_id))
         
+        if not Order.get_order_by_user_id(current_user.id, product_id):
+            flash('You have not bought this product yet!', 'danger')
+            return redirect(url_for('products.product_page', product_id=product_id))
+    
         # Create review
         Reviews.create_review(seller_id, current_user.id, product_id, rating, comment)
         flash('Review added successfully!', 'success')

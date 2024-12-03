@@ -47,6 +47,19 @@ WHERE user_id = :user_id
                 updated_at = :updated_at
             WHERE order_id = :order_id
         ''', new_status=new_status, updated_at=updated_at, order_id=order_id)
+        
+    @staticmethod
+    def get_order_by_user_id(user_id, product_id):
+        rows = app.db.execute('''
+            SELECT o.order_id
+            FROM Orders o
+            JOIN Order_Items i ON o.order_id = i.order_id
+            WHERE o.user_id = :user_id
+            AND i.product_id = :product_id
+        ''', user_id=user_id, product_id=product_id)
+        # Return the fetched order_id(s)
+        return len(rows) > 0
+
     
     @staticmethod
     def get_all_by_uid_since(user_id, since, limit=None):
