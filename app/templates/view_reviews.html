@@ -18,7 +18,18 @@
         {% for review in reviews %}
         <tr>
           <td>{{ review.type }}</td>
-          <td>{{ review.id }}</td>
+          <td>
+            {% if review.type == "product" %}
+            <a
+              href="{{ url_for('products.product_page', product_id=review.id) }}"
+              >{{ review.name }}</a
+            >
+            {% elif review.type == "seller" %}
+            <a href="{{ url_for('users.public_profile', user_id=review.id) }}"
+              >{{ review.name }}</a
+            >
+            {% else %} {{ review.name }} {% endif %}
+          </td>
           <td>{{ review.average_rating|round(1) }}</td>
           <td>{{ review.review_count }}</td>
           <td>{{ review.latest_review_date.strftime('%Y-%m-%d') }}</td>

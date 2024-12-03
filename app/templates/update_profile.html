@@ -1,20 +1,13 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-5">
   <h1 class="text-center">Update Profile</h1>
 
   <!-- Display only error messages -->
-  {% with messages = get_flashed_messages(with_categories=True) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        {% if category == 'danger' %}
-          <div class="alert alert-danger">
-            {{ message }}
-          </div>
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  {% with messages = get_flashed_messages(with_categories=True) %} {% if
+  messages %} {% for category, message in messages %} {% if category == 'danger'
+  %}
+  <div class="alert alert-danger">{{ message }}</div>
+  {% endif %} {% endfor %} {% endif %} {% endwith %}
 
   <form method="POST" action="{{ url_for('profile.update_profile') }}">
     <!-- First Name -->
@@ -27,7 +20,7 @@
         name="first_name"
         value="{{ first_name }}"
         required
-      >
+      />
     </div>
 
     <!-- Last Name -->
@@ -40,7 +33,7 @@
         name="last_name"
         value="{{ last_name }}"
         required
-      >
+      />
     </div>
 
     <!-- Email -->
@@ -53,43 +46,24 @@
         name="email"
         value="{{ email }}"
         required
-      >
+      />
     </div>
 
     <!-- Address -->
     <div class="form-group">
       <label for="address">Address</label>
-      <textarea
-        class="form-control"
-        id="address"
-        name="address"
-      >{{ address }}</textarea>
+      <textarea class="form-control" id="address" name="address">
+{{ address }}</textarea
+      >
     </div>
 
     <!-- Summary -->
     <div class="form-group">
       <label for="summary">Summary</label>
-      <textarea
-        class="form-control"
-        id="summary"
-        name="summary"
-      >{{ summary }}</textarea>
-    </div>
-
-    <!-- Balance -->
-    <!--
-    <div class="form-group">
-      <label for="balance">Balance</label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="balance"
-        name="balance"
-        value="{{ balance }}"
+      <textarea class="form-control" id="summary" name="summary">
+{{ summary }}</textarea
       >
     </div>
-    -->
 
     <!-- Add the new Balance Update Section -->
     <div class="form-group">
@@ -110,7 +84,7 @@
           id="balance_amount"
           name="balance_amount"
           placeholder="Amount"
-        >
+        />
       </div>
       <small class="form-text text-muted">
         Your current balance is ${{ "%.2f"|format(balance) }}.
@@ -119,17 +93,30 @@
 
     <!-- Password -->
     <div class="form-group">
-      <label for="password">New Password (leave blank to keep current password)</label>
+      <label for="password"
+        >New Password (leave blank to keep current password)</label
+      >
       <input
         type="password"
         class="form-control"
         id="password"
         name="password"
-      >
+      />
     </div>
 
     <button type="submit" class="btn btn-success">Save Changes</button>
-    <a href="{{ url_for('profile.profile') }}" class="btn btn-secondary">Cancel</a>
+    <a href="{{ url_for('profile.profile') }}" class="btn btn-secondary"
+      >Cancel</a
+    >
+  </form>
+
+  <!-- Toggle to Seller Button -->
+  <form
+    method="POST"
+    action="{{ url_for('profile.toggle_to_seller') }}"
+    class="mt-4"
+  >
+    <button type="submit" class="btn btn-primary">Become a Seller</button>
   </form>
 </div>
 {% endblock %}
