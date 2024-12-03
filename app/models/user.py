@@ -145,13 +145,23 @@ WHERE email = :email
     @staticmethod
     @login.user_loader
     def get(user_id):
-        rows = app.db.execute("""
-SELECT user_id, email, first_name, last_name, address, password, balance, account_number, public_name, is_seller, summary
-FROM Users
-WHERE user_id = :user_id
-""",
-                              user_id=user_id)
-        return User(*rows[0]) if rows else None
+        rows = app.db.execute('''
+            SELECT
+                user_id,
+                email,
+                first_name,
+                last_name,
+                address,
+                password,
+                balance,
+                account_number,
+                public_name,
+                is_seller,
+                summary
+            FROM Users
+            WHERE user_id = :user_id
+        ''', user_id=user_id)
+        return User(*(rows[0])) if rows else None
 
 
     def update_balance(self, new_balance):

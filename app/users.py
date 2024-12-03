@@ -6,7 +6,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 
 from .models.user import User
-
+from .models.reviews import Reviews
 
 from flask import Blueprint
 bp = Blueprint('users', __name__)
@@ -72,3 +72,18 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index.index'))
+
+
+@bp.route('/user/<int:user_id>')
+def public_profile(user_id):
+    user = User.get(user_id)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('index.index'))
+
+    reviews = []
+    if user.is_seller:
+        # Get reviews for the seller
+        reviews = Reviews.get_by_seller(user_id)
+
+    return render_template('public_profile.html', user=user, reviews=reviews)
