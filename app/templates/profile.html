@@ -25,12 +25,20 @@
           <a
             href="{{ url_for('profile.update_profile') }}"
             class="btn btn-primary"
-            >Update Profile</a
+            >Edit Profile</a
           >
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Move Buttons Here -->
+  {% if current_user.is_seller %}
+  <div class="text-center mb-4">
+    <a href="{{ url_for('seller.inventory') }}" class="btn btn-primary mr-2">View Inventory</a>
+    <a href="{{ url_for('seller.seller_products') }}" class="btn btn-primary">Your Listed Products</a>
+  </div>
+  {% endif %}
 
   <!-- Past Orders -->
   <h3 class="mt-5">Past Orders</h3>
@@ -175,71 +183,6 @@
       color: orange;
     }
   </style>
-
-  {% if current_user.is_seller %}
-  <div class="text-center mt-4">
-    <a href="{{ url_for('seller.inventory') }}" class="btn btn-primary"
-      >View Inventory</a
-    >
-  </div>
-
-  <div class="text-center mt-4">
-    <a href="{{ url_for('seller.seller_products') }}" class="btn btn-primary">Your Listed Products</a>
-  </div>
-
-  <h3 class="mt-5">Your Listed Products</h3>
-  {% if seller_products %}
-    <div class="row">
-      {% for product in seller_products %}
-      <div class="col-md-4">
-        <div class="card mb-4">
-          <img
-            src="{{ product.image_url }}"
-            class="card-img-top"
-            alt="{{ product.name }}"
-          />
-          <div class="card-body">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p>{{ product.summary }}</p>
-            <p><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</p>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>No products listed.</p>
-  {% endif %}
-
-  <h3 class="mt-5">Reviews for Your Products</h3>
-  {% if product_reviews %}
-    {% for item in product_reviews %}
-    <h4>{{ item.product.name }}</h4>
-    {% if item.reviews %}
-      {% for review in item.reviews %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <p>
-            {% for i in range(review.rating|int) %}
-            <span class="fa fa-star checked"></span>
-            {% endfor %}
-            {% for i in range(5 - (review.rating|int)) %}
-            <span class="fa fa-star"></span>
-            {% endfor %}
-          </p>
-          <p>{{ review.comment }}</p>
-          <p class="text-muted">By User ID: {{ review.reviewer_id }} on {{ review.created_at.strftime('%Y-%m-%d') }}</p>
-        </div>
-      </div>
-      {% endfor %}
-    {% else %}
-      <p>No reviews for this product.</p>
-    {% endif %}
-    {% endfor %}
-  {% else %}
-    <p>No reviews for your products.</p>
-  {% endif %}
-  {% endif %}
 </div>
 
 {% endblock %}
