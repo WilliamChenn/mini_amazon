@@ -9,12 +9,13 @@ from .models.product import Product
 from .models.orders import Order  # Updated import
 from .models.order_items import OrderItem
 
-from app.models.reviews import Reviews
+from .models.reviews import Reviews
 
 
 bp = Blueprint('profile', __name__)
 
 @bp.route('/profile', methods=['GET'])
+@login_required
 def profile():
     if current_user.is_authenticated:
         # Get page number from request args
@@ -49,19 +50,33 @@ def profile():
                 'items': items_with_details
             })
         # Get recent reviews
-        reviews = Reviews.get_reviews_by_user_id(current_user.id)
+        reviews = Reviews.get_reviews_by_user_id(current_user.user_id)
     else:
         reviews = None
         orders_with_items = None
         page = None
         total_pages = None
 
+    # Fetch seller's products and associated reviews
+    seller_products = []
+    product_reviews = []
+    if current_user.is_seller:
+        seller_products = Product.get_by_seller(current_user.user_id)
+        for product in seller_products:
+            reviews = Reviews.get_by_product(product.product_id)
+            product_reviews.append({
+                'product': product,
+                'reviews': reviews
+            })
+
     return render_template(
         'profile.html',
         reviews=reviews,
         orders_with_items=orders_with_items,
         page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        seller_products=seller_products,
+        product_reviews=product_reviews
     )
 
 

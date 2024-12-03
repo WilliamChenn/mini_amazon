@@ -1,0 +1,26 @@
+<!-- templates/seller_products.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">Your Listed Products</h1>
+  {% if products %}
+  <div class="row">
+    {% for product in products %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p>{{ product.summary }}</p>
+          <p><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</p>
+          <a href="{{ url_for('seller.product_reviews', product_id=product.product_id) }}" class="btn btn-primary">View Reviews</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>No products listed.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!-- templates/public_profile.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">{{ user.public_name }}</h1>
+  <p><strong>Account Number:</strong> {{ user.account_number }}</p>
+  <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+  <p><strong>Summary:</strong> {{ user.summary }}</p>
+
+  {% if user.is_seller %}
+  <h3 class="mt-5">Seller Information</h3>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Address:</strong> {{ user.address }}</p>
+
+  <h3 class="mt-5">Reviews for this Seller</h3>
+  {% if reviews %}
+    {% for review in reviews %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <p>
+          {% for i in range(review.rating|int) %}
+          <span class="fa fa-star checked"></span>
+          {% endfor %}
+          {% for i in range(5 - (review.rating|int)) %}
+          <span class="fa fa-star"></span>
+          {% endfor %}
+        </p>
+        <p>{{ review.comment }}</p>
+        <p class="text-muted">By User ID: {{ review.reviewer_id }} on {{ review.created_at.strftime('%Y-%m-%d') }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>No reviews for this seller.</p>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

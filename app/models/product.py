@@ -37,10 +37,19 @@ WHERE available = :available
     @staticmethod
     def get_by_seller(seller_id):
         rows = app.db.execute('''
-            SELECT p.product_id, p.seller_id, p.category_id, p.name, p.summary, p.image_url, p.price, p.created_at, p.updated_at, p.available
-            FROM Products p
-            JOIN seller_products sp ON p.product_id = sp.product_id
-            WHERE sp.seller_id = :seller_id
+            SELECT
+                product_id,
+                seller_id,
+                category_id,
+                name,
+                summary,
+                image_url,
+                price,
+                created_at,
+                updated_at,
+                available
+            FROM Products
+            WHERE seller_id = :seller_id
         ''', seller_id=seller_id)
         return [Product(*row) for row in rows]
 

@@ -7,6 +7,8 @@ from app.models.product import Product
 from app.models.seller_products import SellerProduct  # Ensure this model exists
 from app.models.category import Category  # Ensure this model exists
 from datetime import datetime
+from .models.reviews import Reviews
+from app.models.user import User
 
 bp = Blueprint('seller', __name__, url_prefix='/seller')
 
@@ -102,6 +104,31 @@ def create_product():
         # Retrieve form data from session if available
         form_data = session.pop('create_product_form_data', {})
         return render_template('create_product.html', title='List a New Product', categories=categories, form_data=form_data)
+
+@bp.route('/seller_products', methods=['GET'])
+@login_required
+def seller_products():
+    if not current_user.is_seller:
+        flash('You are not authorized to view this page.', 'danger')
+        return redirect(url_for('profile.profile'))
+
+    products = Product.get_by_seller(current_user.id)
+    return render_template('seller_products.html', products=products)
+
+@bp.route('/product_reviews/<int:product_id>', methods=['GET'])
+@login_required
+def product_reviews(product_id):
+    product = Product.get(product_id)
+    if not product or product.seller_id != current_user.id:
+        flash('You are not authorized to view this page.', 'danger')
+        return redirect(url_for('seller.seller_products'))
+
+    reviews = Reviews.get_by_product(product_id)
+    # Fetch reviewer details
+    for review in reviews:
+        reviewer = User.get(review.reviewer_id)
+        review.reviewer = reviewer
+    return render_template('product_reviews.html', product=product, reviews=reviews)
 
 # app/models/inventory.py
 @staticmethod
