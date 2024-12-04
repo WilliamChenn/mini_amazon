@@ -51,6 +51,7 @@
         action="{{ url_for('cart.add_to_cart', product_id=product.product_id) }}"
         method="POST"
       >
+        <!-- Choose a Seller Dropdown -->
         <div class="form-group">
           <label for="seller_id">Choose a Seller:</label>
           <select name="seller_id" id="seller_id" class="form-control w-50">
@@ -61,7 +62,23 @@
             </option>
             {% endfor %}
           </select>
+          <!-- List of Sellers with Profile Links -->
+          <div class="mt-2">
+            {% for item in sellers %}
+            <p>
+              <strong>
+                <a
+                  href="{{ url_for('users.public_profile', user_id=item.seller.user_id) }}"
+                >
+                  {{ item.seller.first_name }} {{ item.seller.last_name }}
+                </a>
+              </strong>
+              - Quantity Available: {{ item.quantity }}
+            </p>
+            {% endfor %}
+          </div>
         </div>
+
         <div class="form-group">
           <label for="quantity">Quantity:</label>
           <input
