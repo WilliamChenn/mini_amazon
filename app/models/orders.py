@@ -33,11 +33,13 @@ WHERE order_id = :order_id
     @staticmethod
     def get_by_user(user_id):
         rows = app.db.execute('''
-SELECT order_id, user_id, total_amount, num_items, fulfillment_status, created_at, updated_at
-FROM Orders
-WHERE user_id = :user_id
-''', user_id=user_id)
+            SELECT order_id, user_id, total_amount, num_items, fulfillment_status, created_at, updated_at
+            FROM Orders
+            WHERE user_id = :user_id
+            ORDER BY created_at DESC
+        ''', user_id=user_id)
         return [Order(*row) for row in rows]
+        
     @staticmethod
     def update_status(order_id, new_status):
         updated_at = datetime.utcnow()

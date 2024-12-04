@@ -42,9 +42,40 @@ WHERE order_id = :order_id
 
     @staticmethod
     def update_status(order_item_id, new_status):
+        # Update the order item's status
         app.db.execute('''
             UPDATE Order_Items
             SET fulfillment_status = :new_status,
                 fulfilled_at = CASE WHEN :new_status = 'Fulfilled' THEN CURRENT_TIMESTAMP ELSE fulfilled_at END
             WHERE order_item_id = :order_item_id
         ''', new_status=new_status, order_item_id=order_item_id)
+
+        # Get the order_id for the updated order item
+        order_id = app.db.execute('''
+            SELECT order_id FROM Order_Items WHERE order_item_id = :order_item_id
+        ''', order_item_id=order_item_id)[0][0]
+
+        # Check if all order items in the order are fulfilled
+        unfulfilled_items = app.db.execute('''
+            SELECT COUNT(*) FROM Order_Items
+            WHERE order_id = :order_id AND fulfillment_status != 'Fulfilled'
+        ''', order_id=order_id)[0][0]
+
+        # Update the order's fulfillment status if necessary
+        if unfulfilled_items == 0:
+            app.db.execute('''
+                UPDATE Orders
+                SET fulfillment_status = 'Fulfilled'
+                WHERE order_id = :order_id
+            ''', order_id=order_id)
+
+    @staticmethod
+    def get_unfulfilled_order_items_by_seller_and_product(seller_id, product_id):
+        rows = app.db.execute('''
+            SELECT order_item_id, order_id, product_id, seller_id, quantity, unit_price, total_price, fulfillment_status, fulfilled_at
+            FROM Order_Items
+            WHERE seller_id = :seller_id
+            AND product_id = :product_id
+            AND fulfillment_status != 'Fulfilled'
+        ''', seller_id=seller_id, product_id=product_id)
+        return [OrderItem(*row) for row in rows]

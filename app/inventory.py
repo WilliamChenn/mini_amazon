@@ -9,6 +9,8 @@ from app.models.category import Category  # Ensure this model exists
 from datetime import datetime
 from .models.reviews import Reviews
 from app.models.user import User
+from app.models.order_items import OrderItem
+from app.models.orders import Order
 
 bp = Blueprint('seller', __name__, url_prefix='/seller')
 
@@ -129,6 +131,37 @@ def product_reviews(product_id):
         reviewer = User.get(review.reviewer_id)
         review.reviewer = reviewer
     return render_template('product_reviews.html', product=product, reviews=reviews)
+
+@bp.route('/order_fulfillment/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def order_fulfillment(product_id):
+    if not current_user.is_seller:
+        flash('You are not authorized to view this page.', 'danger')
+        return redirect(url_for('profile.profile'))
+
+    product = Product.get(product_id)
+    if not product:
+        flash('Product not found.', 'danger')
+        return redirect(url_for('seller.seller_products'))
+
+    # Get unfulfilled order items for this product sold by the current seller
+    order_items = OrderItem.get_unfulfilled_order_items_by_seller_and_product(current_user.id, product_id)
+
+    # Fetch buyer information for each order item
+    for item in order_items:
+        order = Order.get(item.order_id)
+        buyer = User.get(order.user_id)
+        item.buyer = buyer
+
+    if request.method == 'POST':
+        # Process form data to mark selected orders as fulfilled
+        fulfilled_order_item_ids = request.form.getlist('fulfill_order_items')
+        for order_item_id in fulfilled_order_item_ids:
+            OrderItem.update_status(order_item_id, 'Fulfilled')
+        flash('Selected orders have been marked as fulfilled.', 'success')
+        return redirect(url_for('seller.order_fulfillment', product_id=product_id))
+
+    return render_template('fulfillment.html', product=product, order_items=order_items)
 
 # app/models/inventory.py
 @staticmethod

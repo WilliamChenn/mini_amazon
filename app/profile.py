@@ -24,7 +24,7 @@ def profile():
 
         # Get all orders for the user
         all_orders = Order.get_by_user(current_user.id)
-
+       
         # Compute total pages
         total_orders = len(all_orders)
         total_pages = math.ceil(total_orders / per_page)
@@ -166,4 +166,3 @@ def update_profile():
             summary=current_user.summary,
             balance=current_user.balance  # Pass current balance
         )
-    

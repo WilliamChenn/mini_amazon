@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1>Order Fulfillment for {{ product.name }}</h1>
+  <form method="POST">
+    {% if order_items %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Order ID</th>
+          <th>Buyer</th>
+          <th>Quantity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order_items %}
+        <tr>
+          <td>
+            <input type="checkbox" name="fulfill_order_items" value="{{ item.order_item_id }}">
+          </td>
+          <td>{{ item.order_id }}</td>
+          <td>{{ item.buyer.first_name }} {{ item.buyer.last_name }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.fulfillment_status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Mark as Fulfilled</button>
+    {% else %}
+    <p>No unfulfilled orders for this product.</p>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
