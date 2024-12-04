@@ -54,11 +54,11 @@
           <p>
             Total Amount: ${{ "%.2f"|format(order_data.order.total_amount) }}
           </p>
-          <p>Status: {{ order_data.order.fulfillment_status }}</p>
+          <p>Status: {{ order_data.order.compute_fulfillment_status() }}</p>
           <!-- Order Items -->
           <h6 class="mt-4">Items in this order:</h6>
           <div class="row">
-            {% for item_data in order_data.items %}
+            {% for item_data in order_data['items'] %}
             <div class="col-md-4">
               <div class="card mb-3">
                 <img
@@ -77,7 +77,7 @@
                     Total Price: ${{
                     "%.2f"|format(item_data.order_item.total_price) }}
                   </p>
-                  <p>Item Status: {{ item_data.order_item.fulfillment_status }}</p>
+                  <p>Status: {{ item_data.order_item.fulfillment_status }}</p>
                 </div>
               </div>
             </div>

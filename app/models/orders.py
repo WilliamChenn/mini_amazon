@@ -101,3 +101,10 @@ WHERE order_id = :order_id
         rows = app.db.execute(query, **params)
 
         return [Order(*row) for row in rows]
+
+    def compute_fulfillment_status(self):
+        unfulfilled_items = app.db.execute('''
+            SELECT COUNT(*) FROM Order_Items
+            WHERE order_id = :order_id AND fulfillment_status != 'Fulfilled'
+        ''', order_id=self.order_id)[0][0]
+        return 'Fulfilled' if unfulfilled_items == 0 else 'Pending'

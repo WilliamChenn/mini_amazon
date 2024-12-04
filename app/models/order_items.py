@@ -55,19 +55,22 @@ WHERE order_id = :order_id
             SELECT order_id FROM Order_Items WHERE order_item_id = :order_item_id
         ''', order_item_id=order_item_id)[0][0]
 
-        # Check if all order items in the order are fulfilled
+        # Check if any order items in the order are not fulfilled
         unfulfilled_items = app.db.execute('''
             SELECT COUNT(*) FROM Order_Items
             WHERE order_id = :order_id AND fulfillment_status != 'Fulfilled'
         ''', order_id=order_id)[0][0]
 
-        # Update the order's fulfillment status if necessary
+        # Update the order's fulfillment status accordingly
         if unfulfilled_items == 0:
-            app.db.execute('''
-                UPDATE Orders
-                SET fulfillment_status = 'Fulfilled'
-                WHERE order_id = :order_id
-            ''', order_id=order_id)
+            new_order_status = 'Fulfilled'
+        else:
+            new_order_status = 'Pending'
+        app.db.execute('''
+            UPDATE Orders
+            SET fulfillment_status = :new_order_status
+            WHERE order_id = :order_id
+        ''', new_order_status=new_order_status, order_id=order_id)
 
     @staticmethod
     def get_unfulfilled_order_items_by_seller_and_product(seller_id, product_id):
