@@ -39,7 +39,7 @@ def add_review_product(product_id):
     
     # On GET, render the form
     product = Product.get(product_id)
-    return render_template('add_review.html', form_data={}, product_id=product_id,  product_name=product.name, seller_id=seller_id)
+    return render_template('add_review.html', form_data={}, product_id=product_id,  product_name=product.name)
 
 @bp.route('/add-review-seller/<int:seller_id>', methods=['GET', 'POST'])
 def add_review_seller(seller_id):
