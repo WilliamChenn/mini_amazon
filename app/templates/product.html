@@ -78,7 +78,7 @@
             <button type="submit" class="btn btn-primary">Add to Cart</button>
             <a
               id="add-review-link"
-              href="{{ url_for('reviews.add_review', product_id=product.product_id, seller_id=sellers[0].seller.user_id) }}"
+              href="{{ url_for('reviews.add_review_product', product_id=product.product_id, seller_id=sellers[0].seller.user_id) }}"
               class="btn btn-primary"
             >
               Add Review
@@ -107,8 +107,12 @@
         </p>
         <p>{{ review.comment }}</p>
         <p class="text-muted">
-          By <a href="{{ url_for('users.public_profile', user_id=review.reviewer_id) }}">{{ review.reviewer.first_name }} {{ review.reviewer.last_name }}</a> on
-          {{ review.created_at.strftime('%Y-%m-%d') }}
+          By
+          <a
+            href="{{ url_for('users.public_profile', user_id=review.reviewer_id) }}"
+            >{{ review.reviewer.first_name }} {{ review.reviewer.last_name }}</a
+          >
+          on {{ review.created_at.strftime('%Y-%m-%d') }}
         </p>
 
         {% if review.reviewer_id == current_user.id %}

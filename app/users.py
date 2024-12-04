@@ -85,5 +85,10 @@ def public_profile(user_id):
     if user.is_seller:
         # Get reviews for the seller
         reviews = Reviews.get_by_seller(user_id)
+        
+        for review in reviews:
+            reviewer = User.get(review.reviewer_id)
+            review.reviewer = reviewer  # Attach reviewer to review
+            
 
     return render_template('public_profile.html', user=user, reviews=reviews)

@@ -2,7 +2,7 @@ from flask import current_app as app, render_template
 from flask_login import current_user
 
 class Reviews:
-    def __init__(self, review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at, product_name=None):
+    def __init__(self, review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at, product_seller ,product_name=None):
         self.review_id = review_id
         self.seller_id = seller_id
         self.reviewer_id = reviewer_id
@@ -11,12 +11,13 @@ class Reviews:
         self.comment = comment
         self.created_at = created_at
         self.updated_at = updated_at
-        self.product_name = product_name  # Optional: name of the product
+        self.product_name = product_name
+        self.product_seller = product_seller
 
     @staticmethod
     def get_by_id(review_id):
         rows = app.db.execute('''
-            SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at
+            SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at, product_seller
             FROM Reviews
             WHERE review_id = :review_id
             ''', review_id=review_id)
@@ -25,9 +26,10 @@ class Reviews:
     @staticmethod
     def get_by_product(product_id):
         rows = app.db.execute('''
-            SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at
+            SELECT review_id, seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at, product_seller
             FROM Reviews
             WHERE product_id = :product_id
+            AND product_seller = TRUE
             ORDER BY created_at DESC
         ''', product_id=product_id)
         return [Reviews(*row) for row in rows]
@@ -35,10 +37,10 @@ class Reviews:
     @staticmethod
     def get_by_seller(seller_id):
         rows = app.db.execute('''
-            SELECT r.review_id, r.seller_id, r.reviewer_id, r.product_id, r.rating, r.comment, r.created_at, r.updated_at
+            SELECT r.review_id, r.seller_id, r.reviewer_id, r.product_id, r.rating, r.comment, r.created_at, r.updated_at, r.product_seller
             FROM Reviews r
-            JOIN Products p ON r.product_id = p.product_id
-            WHERE p.seller_id = :seller_id
+            WHERE r.seller_id = :seller_id
+            AND r.product_seller = FALSE
         ''', seller_id=seller_id)
         return [Reviews(*row) for row in rows]
     
@@ -60,8 +62,20 @@ class Reviews:
             WHERE r.reviewer_id = :reviewer_id
             ORDER BY r.created_at DESC
         ''', reviewer_id=reviewer_id)
-
-        return [Reviews(*row) for row in rows]
+        return [
+            {
+                'review_id': row[0],
+                'seller_id': row[1],
+                'reviewer_id': row[2],
+                'product_id': row[3],
+                'rating': row[4],
+                'comment': row[5],
+                'created_at': row[6],
+                'updated_at': row[7],
+                'product_name': row[8]
+            }
+            for row in rows
+        ]
     
     @staticmethod
     def review_user_id_exists(user_id, product_id):
@@ -71,6 +85,16 @@ class Reviews:
             WHERE r.reviewer_id = :reviewer_id
             AND r.product_id = :product_id
             ''', reviewer_id=user_id, product_id = product_id)
+        return len(rows) > 0
+    
+    @staticmethod
+    def review_seller_user_id_exists(user_id, seller_id):
+        rows = app.db.execute('''
+            SELECT review_id
+            FROM Reviews r
+            WHERE r.reviewer_id = :reviewer_id
+            AND r.seller_id = :seller_id
+            ''', reviewer_id=user_id, seller_id = seller_id)
         return len(rows) > 0
     
     @staticmethod
@@ -88,19 +112,20 @@ class Reviews:
         return True
     
     @staticmethod
-    def create_review(seller_id, reviewer_id, product_id, rating, comment):
+    def create_review(seller_id, reviewer_id, product_id, rating, comment, product_seller):
         app.db.execute('''
-            INSERT INTO Reviews (seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at)
-            VALUES (:seller_id, :reviewer_id, :product_id, :rating, :comment, NOW(), NOW())
+            INSERT INTO Reviews (seller_id, reviewer_id, product_id, rating, comment, created_at, updated_at, product_seller)
+            VALUES (:seller_id, :reviewer_id, :product_id, :rating, :comment, NOW(), NOW(), :product_seller)
         ''',
         seller_id=seller_id,
         reviewer_id=reviewer_id,
         product_id=product_id,
         rating=rating,
-        comment=comment)
+        comment=comment,
+        product_seller=product_seller
+        )
         return True
 
-    
     @staticmethod
     def delete_review(review_id):
         app.db.execute('''
@@ -116,6 +141,7 @@ class Reviews:
             SELECT u.user_id, u.first_name, AVG(r.rating) AS average_rating, MAX(r.created_at) AS latest_review_date, COUNT(r.rating) AS rating_count
             FROM Reviews r
             JOIN Users u ON r.seller_id = u.user_id
+            WHERE r.product_seller = FALSE
             GROUP BY r.seller_id, u.first_name, u.user_id
             ORDER BY average_rating DESC, latest_review_date DESC
         ''')
@@ -130,6 +156,7 @@ class Reviews:
             SELECT p.product_id, p.name, AVG(r.rating) AS average_rating, MAX(r.created_at) AS latest_review_date, COUNT(r.rating) AS rating_count
             FROM Reviews r
             JOIN Products p ON r.product_id = p.product_id
+            WHERE r.product_seller = TRUE
             GROUP BY p.product_id, p.name
             ORDER BY average_rating DESC, latest_review_date DESC
         ''')

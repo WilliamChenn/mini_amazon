@@ -59,6 +59,18 @@ WHERE user_id = :user_id
         ''', user_id=user_id, product_id=product_id)
         # Return the fetched order_id(s)
         return len(rows) > 0
+    
+    @staticmethod
+    def get_order_by_user_id_seller(user_id, seller_id):
+        rows = app.db.execute('''
+            SELECT o.order_id
+            FROM Orders o
+            JOIN Order_Items i ON o.order_id = i.order_id
+            WHERE o.user_id = :user_id
+            AND i.seller_id = :seller_id
+        ''', user_id=user_id, seller_id=seller_id)
+        # Return the fetched order_id(s)
+        return len(rows) > 0
 
     
     @staticmethod

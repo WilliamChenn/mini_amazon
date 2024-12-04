@@ -51,6 +51,8 @@ def profile():
             })
         # Get recent reviews
         reviews = Reviews.get_reviews_by_user_id(current_user.user_id)
+        print(reviews)
+        print(current_user.id)
     else:
         reviews = None
         orders_with_items = None
@@ -159,35 +161,3 @@ def update_profile():
             summary=current_user.summary,
             balance=current_user.balance  # Pass current balance
         )
-
-
-@bp.route('/add-review', methods=['POST'])
-def add_review():
-    # Parse the JSON payload
-    data = request.get_json()
-
-    # Extract required fields from the JSON data
-    seller_id = data.get('seller_id')
-    product_id = data.get('product_id')
-    rating = data.get('rating')
-    comment = data.get('comment')
-
-    # Use the authenticated user's ID as reviewer_id
-    reviewer_id = data.get('reviewer_id')  # Or use current_user.id if authenticated
-    
-    
-    # TODO: Add validation and customer authentication
-
-    # Create the review
-    success = Reviews.create_review(
-        seller_id=seller_id,
-        reviewer_id=reviewer_id,
-        product_id=product_id,
-        rating=rating,
-        comment=comment
-    )
-
-    if success:
-        return jsonify({'message': 'Review added successfully.'}), 201
-    else:
-        return jsonify({'error': 'Failed to add review.'}), 500
