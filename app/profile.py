@@ -80,7 +80,12 @@ def profile():
         seller_products=seller_products,
         product_reviews=product_reviews
     )
-
+@bp.route('/profile/toggle_to_seller', methods=['POST'])
+@login_required
+def toggle_to_seller():
+    current_user.toggle_to_seller()
+    flash('You are now a seller!', 'success')
+    return redirect(url_for('profile.profile'))
 
 @bp.route('/profile/update', methods=['GET', 'POST'])
 @login_required
@@ -161,3 +166,4 @@ def update_profile():
             summary=current_user.summary,
             balance=current_user.balance  # Pass current balance
         )
+    

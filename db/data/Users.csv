@@ -4,3 +4,5 @@
 3,bob.builder@example.com,Bob,Builder,"321 Birch Lane, Star City, CA","pbkdf2:sha256:150000$jkl012$m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2g3h4i5j6k7l8m9n0o1p2q3r4",50.00,880e8400-e29b-41d4-a716-446655440003,Bobby,false,"Professional builder and DIY enthusiast."
 5,wzc2@duke.edu,William,Chen,,pbkdf2:sha256:600000$ng9aXx986brGZZN0$30ae3ee9989706937617ce7b4416d5829f718337c9527f9bb2a8bf88f1e5efd8,10000000.00,af0c268b-d3ac-46ae-b9dd-df7304b7f199,William,True,""
 4,example@gmail.com,Kevin,Lee,,pbkdf2:sha256:600000$4pQSyE0OD4IE24sn$40f705d417288a3ce706070a5ffa49fd0d5a97ae847f195d19d5d4d42563a103,10000000.00,8c992051-3dc1-4ff9-945c-7c5a5a20376d,Kevin,False,""
+6,will@gmail.com,billy,chen,,pbkdf2:sha256:600000$Zh2qhkEsXRTy9OUb$71d3d29a59cddb96afd2e49a0cbcf2b7753ae9db0a89e49e16bcc00a89e9b6af,0.00,2b349006-625a-41ed-9a42-78e1c03209c0,billy,False,
+7,billy@gmail.com,billy,chen,,pbkdf2:sha256:600000$c8JW0DfM0fURF3z9$7ef3f3e906c85c53c7ac4229f1f94f2cfcdc6340564b6188e02df30521b7f8c9,0.00,86f0ef57-0b1f-4ed7-beda-cb6f63d3ffd1,billy,False,

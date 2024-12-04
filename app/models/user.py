@@ -279,3 +279,12 @@ WHERE user_id = :user_id
         except Exception as e:
             print(f"Error updating last name: {str(e)}")
             return False
+
+    def toggle_to_seller(self):
+        self.is_seller = True
+        # Update the user in the database
+        app.db.execute('''
+            UPDATE Users
+            SET is_seller = :is_seller
+            WHERE user_id = :user_id
+        ''', is_seller=self.is_seller, user_id=self.user_id)

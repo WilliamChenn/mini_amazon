@@ -110,6 +110,7 @@
     >
   </form>
 
+  {% if not current_user.is_seller %}
   <!-- Toggle to Seller Button -->
   <form
     method="POST"
@@ -118,5 +119,6 @@
   >
     <button type="submit" class="btn btn-primary">Become a Seller</button>
   </form>
+  {% endif %}
 </div>
 {% endblock %}

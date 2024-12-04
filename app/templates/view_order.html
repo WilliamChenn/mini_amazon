@@ -1,0 +1,32 @@
+<!-- templates/view_order.html -->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1>Order Details - Order #{{ order.order_id }}</h1>
+  <p>Order Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+  <p>Total Amount: ${{ "%.2f"|format(order.total_amount) }}</p>
+  <p>Status: {{ order.fulfillment_status }}</p>
+
+  <h3 class="mt-4">Items</h3>
+  <div class="row">
+    {% for item in items %}
+    <div class="col-md-12">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5>{{ item.product.name }}</h5>
+          <p>Seller: {{ item.seller.first_name }} {{ item.seller.last_name }}</p>
+          <p>Quantity: {{ item.order_item.quantity }}</p>
+          <p>Unit Price: ${{ "%.2f"|format(item.order_item.unit_price) }}</p>
+          <p>Total Price: ${{ "%.2f"|format(item.order_item.total_price) }}</p>
+          <p>Fulfillment Status: {{ item.order_item.fulfillment_status }}</p>
+          {% if item.order_item.fulfillment_status == 'Fulfilled' %}
+          <p>Fulfilled At: {{ item.order_item.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
