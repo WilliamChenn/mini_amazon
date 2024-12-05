@@ -13,7 +13,14 @@ class Product:
         self.created_at = created_at
         self.updated_at = updated_at
         self.available = available
-
+    @staticmethod
+    def exists_for_seller(name, seller_id):
+        rows = app.db.execute('''
+            SELECT 1
+            FROM Products
+            WHERE name = :name AND seller_id = :seller_id
+        ''', name=name, seller_id=seller_id)
+        return len(rows) > 0
     @staticmethod
     def get(product_id):
         rows = app.db.execute('''

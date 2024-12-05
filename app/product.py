@@ -21,7 +21,10 @@ def create_product():
         category_id = request.form.get('category_id')
         image_url = request.form.get('image_url')
         quantity = request.form.get('quantity')
-
+        # Check if the product already exists for this seller
+        if Product.exists_for_seller(name, current_user.id):
+            flash('Item already exists', 'danger')
+            return redirect(url_for('products.create_product'))
         # Validate form data
         if not name or not price or not category_id or not quantity:
             flash('Please fill out all required fields.')
@@ -33,7 +36,6 @@ def create_product():
         except ValueError:
             flash('Invalid price or quantity.')
             return redirect(url_for('products.create_product'))
-
         # Create the product
         new_product = Product.create(
             seller_id=current_user.id,
@@ -64,7 +66,8 @@ def create_product():
     else:
         # For GET request, fetch categories
         categories = Category.get_all()
-        return render_template('create_product.html', categories=categories)
+        form_data = {}  # Initialize form_data as an empty dictionary
+        return render_template('create_product.html', categories=categories, form_data=form_data)
 
 @bp.route('/<int:product_id>')
 def product_page(product_id):
