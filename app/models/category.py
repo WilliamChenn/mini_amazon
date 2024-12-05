@@ -64,3 +64,23 @@ class Category:
 
         recurse(category_id)
         return subcategory_ids
+
+    @staticmethod
+    def get_all_ancestor_ids(category_id):
+        """Get all ancestor category IDs (parent, grandparent, etc)"""
+        ancestors = []
+        
+        def recurse(current_id):
+            row = app.db.execute('''
+                SELECT parent_id 
+                FROM Categories 
+                WHERE category_id = :category_id 
+                AND parent_id IS NOT NULL
+            ''', category_id=current_id)
+            if row and row[0][0]:
+                parent_id = row[0][0]
+                ancestors.append(parent_id)
+                recurse(parent_id)
+                
+        recurse(category_id)
+        return ancestors

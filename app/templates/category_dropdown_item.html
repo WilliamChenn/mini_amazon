@@ -1,14 +1,13 @@
 <!-- FILE: app/templates/category_dropdown_item.html -->
 
-<li class="dropdown-submenu">
-  <a class="dropdown-item" href="{{ url_for('index.index') }}?category_id={{ category.category_id }}">
+<li>
+  <a class="dropdown-item {% if category.children %}has-children{% endif %}" 
+     href="#" 
+     data-category-id="{{ category.category_id }}">
     {{ category.category_name }}
-    {% if category.children %}
-      &raquo;
-    {% endif %}
   </a>
   {% if category.children %}
-  <ul class="dropdown-menu">
+  <ul class="dropdown-menu dropdown-submenu">
     {% for child in category.children %}
       {% set category = child %}
       {% include 'category_dropdown_item.html' %}

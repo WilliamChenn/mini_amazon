@@ -8,7 +8,7 @@ from .models.orders import Order
 from .models.order_items import OrderItem
 from .models.inventory import Inventory
 from app.models.category import Category
-
+from .models.reviews import Reviews
 from flask import Blueprint
 bp = Blueprint('index', __name__)
 
@@ -40,14 +40,11 @@ def index():
     # Rest of your existing code...
 
     # Example: Fetch products, handle search queries, etc.
+    # Get category filter
+    category_id = request.args.get('category_id', type=int)
     search_query = request.args.get('search_query', '')
     
-    # Collect all selected category IDs
-    category_ids = request.args.getlist('category_id')
-    # Use the last selected category ID
-    category_id = category_ids[-1] if category_ids else None
-
-    # Get products based on search and category
+    # Get products filtered by category and search
     products = Product.search(search_query, category_id)
     
     # Compute total quantities for each product
@@ -56,6 +53,14 @@ def index():
         inventory_list = Inventory.get_by_product(product.product_id)
         total_quantity = sum(inv.quantity for inv in inventory_list)
         product_quantities[product.product_id] = total_quantity
+
+    # Calculate average rating for each product
+    for product in products:
+        reviews = Reviews.get_by_product(product.product_id)
+        if reviews:
+            product.average_rating = sum(review.rating for review in reviews) / len(reviews)
+        else:
+            product.average_rating = None
 
     # Pagination setup
     page = request.args.get('page', 1, type=int)
@@ -83,5 +88,6 @@ def index():
         product_quantities=product_quantities,
         categories=category_tree,
         page=page,
-        total_pages=total_pages
+        total_pages=total_pages,
+        current_category_id=category_id
     )

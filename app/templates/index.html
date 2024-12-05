@@ -3,65 +3,45 @@
 <!-- templates/base.html (or the relevant header template) -->
 <h1>Products for sale:</h1>
 <div class="container">
-  <!-- Add this form at the top -->
-  <form method="GET" action="{{ url_for('index.index') }}" class="form-inline my-2">
-    <input
-      class="form-control mr-sm-2"
-      type="search"
-      id="search_query"
+  <!-- Combine search bar and all dropdowns in one row -->
+  <form class="d-flex align-items-center gap-2 mb-4" method="GET">
+    <input 
+      class="form-control mr-2" 
+      type="search" 
+      placeholder="Search" 
       name="search_query"
-      placeholder="Search products"
-      value="{{ request.args.get('search_query', '') }}"
-    />
-    <!-- Category selectors container -->
-    <div id="category-selectors">
-      <!-- Initial parent category selector here -->
-    </div>
-    <button class="btn btn-outline-success" type="submit">Search</button>
-    <!-- Add this in the appropriate place within your form -->
+      id="search_query"
+    >
+    <button class="btn btn-outline-success mr-2" type="submit">Search</button>
+    
+    <!-- Categories Dropdown -->
     <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button">
-        Categories
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Category: <span id="selectedCategory">All Categories</span>
       </button>
       <ul class="dropdown-menu">
-        {% for category in categories.values() %}
+        <!-- Add data-category-id="all" to the All Categories option -->
+        <li><a class="dropdown-item" href="#" data-category-id="all">All Categories</a></li>
+        {% for category in categories.values() if not category.parent_id %}
           {% include 'category_dropdown_item.html' %}
         {% endfor %}
       </ul>
     </div>
-  </form>
-  <!-- Filter Input Box for Price -->
-  <div class="row mb-4">
-    <div class="col-md-6 offset-md-3">
-      <div class="row">
-        <!-- Min Price Input -->
-        <div class="col-md-6">
-          <label for="minPrice">Min Price:</label>
-          <input
-            type="number"
-            id="minPrice"
-            class="form-control"
-            placeholder="Min Price"
-          />
-        </div>
-        <!-- Max Price Input -->
-        <div class="col-md-6">
-          <label for="maxPrice">Max Price:</label>
-          <input
-            type="number"
-            id="maxPrice"
-            class="form-control"
-            placeholder="Max Price"
-          />
-        </div>
-        <div class="col-md-6">
-          <button type="submit", id="maxPrice", onclick="filterProducts()">Submit</button>
-        </div>
+  
+    <!-- Sort Products Dropdown -->
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Sort By: <span id="selectedSort">None</span>
+      </button>
+      <div class="dropdown-menu" aria-labelledby="sortDropdown">
+        <a class="dropdown-item" href="#" data-sort="newest">Newest to Oldest</a>
+        <a class="dropdown-item" href="#" data-sort="oldest">Oldest to Newest</a>
+        <a class="dropdown-item" href="#" data-sort="rating">Average Rating</a>
+        <a class="dropdown-item" href="#" data-sort="price-asc">Price: Low to High</a>
+        <a class="dropdown-item" href="#" data-sort="price-desc">Price: High to Low</a>
       </div>
     </div>
-  </div>
-
-
+  </form>
 
   <h2>Products:</h2>
 
@@ -70,7 +50,10 @@
     {% for product in avail_products %}
     <!-- Get total quantity from the passed data -->
     {% set total_quantity = product_quantities[product.product_id] %}
-    <div class="col-md-4 product-card" data-price="{{ product.price }}">
+    <div class="col-md-4 product-card" 
+         data-price="{{ product.price }}"
+         data-rating="{{ product.average_rating|default(0) }}"
+         data-date="{{ product.created_at.timestamp() }}">
       <div class="card mb-4">
         <!-- Wrap the image and product details in a link -->
         <a href="{{ url_for('products.product_page', product_id=product.product_id) }}" style="text-decoration: none; color: inherit;">
@@ -83,9 +66,19 @@
           <div class="card-body">
             <!-- Product Name -->
             <h5 class="card-title">{{ product.name }}</h5>
-            <!-- Smaller Product ID -->
+            <!-- Replace product ID with rating -->
             <p class="text-muted" style="font-size: 0.85em">
-              Product ID: {{ product.product_id }}
+              {% if product.average_rating %}
+                {% for i in range((product.average_rating|round(0, 'floor'))|int) %}
+                  <span class="fa fa-star checked"></span>
+                {% endfor %}
+                {% for i in range(5 - (product.average_rating|round(0, 'floor')|int)) %}
+                  <span class="fa fa-star"></span>
+                {% endfor %}
+                ({{ product.average_rating|round(1) }})
+              {% else %}
+                No ratings yet
+              {% endif %}
             </p>
             <!-- Product Summary -->
             <p class="card-text">{{ product.summary }}</p>
@@ -235,6 +228,32 @@
         });
     }
   }
+
+  $(document).ready(function() {
+    // Add click handlers for sort options
+    $('.dropdown-item').click(function(e) {
+      e.preventDefault();
+      const sortType = $(this).data('sort');
+      const products = $('.product-card').get();
+      
+      products.sort(function(a, b) {
+        switch(sortType) {
+          case 'newest':
+            return $(b).data('date') - $(a).data('date');
+          case 'oldest':
+            return $(a).data('date') - $(b).data('date');
+          case 'rating':
+            return $(b).data('rating') - $(a).data('rating');
+          case 'price-asc':
+            return $(a).data('price') - $(b).data('price');
+          case 'price-desc':
+            return $(b).data('price') - $(a).data('price');
+        }
+      });
+      
+      $('#productContainer').html(products);
+    });
+  });
 </script>
 
 <!-- Include jQuery library in your base template or index.html -->
@@ -243,6 +262,9 @@
 <!-- Include jQuery UI library for autocomplete -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
+<!-- Include Font Awesome for star icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
 
 <style>
 /* Dropdown Styles */
@@ -257,16 +279,6 @@
   position: relative;
 }
 
-.dropdown-submenu > .dropdown-menu {
-  top: 0;
-  left: 100%;
-}
-
-.dropdown:hover > .dropdown-menu,
-.dropdown-submenu:hover > .dropdown-menu {
-  display: block;
-}
-
 .dropdown-item {
   display: block;
   width: 100%;
@@ -279,7 +291,166 @@
   background-color: #f8f9fa;
   color: #16181b;
 }
+
+.checked {
+  color: orange;
+}
+.dropdown-toggle::after {
+  display: inline-block;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  content: "";
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+/* Ensure proper spacing */
+.dropdown {
+  margin-right: 0.5rem;
+}
+
+.dropdown-menu {
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+/* Remove hover behaviors */
+.dropdown-menu {
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+/* Styling for nested dropdowns */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+
+.dropdown-menu li {
+  position: relative;
+}
+
+.dropdown-menu .dropdown-submenu {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+}
+
+.dropdown-menu .dropdown-submenu-left {
+  right: 100%;
+  left: auto;
+}
+
+.dropdown-menu > li:hover > .dropdown-submenu {
+  display: block;
+}
+
+.dropdown-item.has-children:after {
+  content: "›";
+  position: absolute;
+  right: 10px;
+}
 </style>
+
+<!-- Make sure you have the Bootstrap JavaScript bundle included -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize all dropdowns
+  var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+  var dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
+    return new bootstrap.Dropdown(dropdownToggleEl)
+  });
+
+  // Initialize dropdowns
+  var dropdowns = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+  dropdowns.map(function(dropdownToggle) {
+    return new bootstrap.Dropdown(dropdownToggle)
+  });
+
+  // Handle sort selection
+  document.querySelectorAll('#sortDropdown + .dropdown-menu .dropdown-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const sortType = this.dataset.sort;
+      const sortText = this.textContent;
+      document.getElementById('selectedSort').textContent = sortText;
+
+      // Sort products
+      const products = Array.from(document.querySelectorAll('.product-card'));
+      products.sort((a, b) => {
+        switch(sortType) {
+          case 'rating':
+            const ratingA = parseFloat(a.dataset.rating) || 0;
+            const ratingB = parseFloat(b.dataset.rating) || 0;
+            return ratingB - ratingA;  // Higher ratings first
+          case 'newest':
+            return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+          case 'oldest':
+            return parseFloat(a.dataset.date) - parseFloat(b.dataset.date);
+          case 'price-asc':
+            return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+          case 'price-desc':
+            return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+        }
+      });
+      
+      const container = document.getElementById('productContainer');
+      container.innerHTML = '';
+      products.forEach(product => container.appendChild(product));
+    });
+  });
+
+  // Update category selection display
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedCategoryId = urlParams.get('category_id');
+  
+  if (selectedCategoryId) {
+    const selectedCategoryElement = document.querySelector(`[data-category-id="${selectedCategoryId}"]`);
+    if (selectedCategoryElement) {
+      document.getElementById('selectedCategory').textContent = selectedCategoryElement.textContent;
+    }
+  }
+  
+  // Handle category selection
+  document.querySelectorAll('.dropdown-item[data-category-id]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent event bubbling
+      
+      const categoryId = this.dataset.categoryId;
+      const categoryName = this.textContent.trim();
+      
+      // Update display
+      document.getElementById('selectedCategory').textContent = categoryName;
+      
+      // Update URL and reload page
+      const url = new URL(window.location);
+      if (categoryId === 'all') {
+        url.searchParams.delete('category_id');
+      } else {
+        url.searchParams.set('category_id', categoryId);
+      }
+      window.location = url;
+    });
+  });
+});
+</script>
 
 <br /><br />
 
