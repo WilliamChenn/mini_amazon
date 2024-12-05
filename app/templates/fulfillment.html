@@ -11,6 +11,7 @@
           <th>Order ID</th>
           <th>Buyer</th>
           <th>Quantity</th>
+          <th>Address</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -23,6 +24,7 @@
           <td>{{ item.order_id }}</td>
           <td>{{ item.buyer.first_name }} {{ item.buyer.last_name }}</td>
           <td>{{ item.quantity }}</td>
+          <td>{{ item.buyer.address }}</td>
           <td>{{ item.fulfillment_status }}</td>
         </tr>
         {% endfor %}
